@@ -1,0 +1,146 @@
+"use client"
+
+import { useState } from "react"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { CalendarIcon, Plus } from "lucide-react"
+import { format } from "date-fns"
+import { createClient } from "@/lib/supabase/client"
+import { goalSchema, type GoalInput } from "@/lib/validations/goal"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
+
+export function AddGoalDialog() {
+  const [open, setOpen] = useState(false)
+  const supabase = createClient()
+  const queryClient = useQueryClient()
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<z.input<typeof goalSchema>, unknown, GoalInput>({
+    resolver: zodResolver(goalSchema),
+  })
+
+  const selectedDate = watch("targetDate")
+
+  const mutation = useMutation({
+    mutationFn: async (values: GoalInput) => {
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user) throw new Error("Non connecté")
+
+      const { error } = await supabase.from("savings_goals").insert({
+        user_id: userData.user.id,
+        name: values.name,
+        target_amount: values.targetAmount,
+        target_date: values.targetDate
+          ? format(values.targetDate, "yyyy-MM-dd")
+          : null,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals"] })
+      reset()
+      setOpen(false)
+    },
+  })
+
+  function onSubmit(values: GoalInput) {
+    mutation.mutate(values)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          Nouvel objectif
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-heading">Nouvel objectif</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nom de l&apos;objectif</Label>
+            <Input
+              id="name"
+              placeholder="Ex : Fonds d'urgence"
+              {...register("name")}
+            />
+            {errors.name && (
+              <p className="text-sm text-destructive">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="targetAmount">Montant cible</Label>
+            <Input
+              id="targetAmount"
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              {...register("targetAmount")}
+            />
+            {errors.targetAmount && (
+              <p className="text-sm text-destructive">
+                {errors.targetAmount.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Date cible (optionnel)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate
+                    ? format(selectedDate, "dd/MM/yyyy")
+                    : "Choisir une date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setValue("targetDate", date)}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <Button type="submit" className="w-full" disabled={mutation.isPending}>
+            {mutation.isPending ? "Création..." : "Créer l'objectif"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}

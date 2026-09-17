@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -42,7 +43,7 @@ export function AddBudgetDialog() {
     setValue,
     reset,
     formState: { errors },
-  } = useForm<BudgetInput>({
+  } = useForm<z.input<typeof budgetSchema>, unknown, BudgetInput>({
     resolver: zodResolver(budgetSchema),
     defaultValues: { recurrence: "monthly" },
   })
