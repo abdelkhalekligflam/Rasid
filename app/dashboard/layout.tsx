@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 
 export default async function DashboardLayout({
   children,
@@ -50,6 +51,8 @@ export default async function DashboardLayout({
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex items-center justify-between h-14 px-4 border-b bg-background sticky top-0 z-10">
           <SidebarTrigger />
+          <div className="flex items-center gap-2">
+          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="outline-none">
@@ -70,6 +73,7 @@ export default async function DashboardLayout({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </header>
         <main className="flex-1 p-6">{children}</main>
       </div>

@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { TransactionActions, type TransactionRow } from "@/components/transactions/transaction-actions"
 import { useCurrency } from "@/hooks/use-currency"
+import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 export default function TransactionsPage() {
   const supabase = createClient()
@@ -62,9 +63,7 @@ export default function TransactionsPage() {
       </div>
       <Card>
         <CardContent className="p-0">
-          {isLoading && (
-            <p className="p-6 text-sm text-muted-foreground">Chargement...</p>
-          )}
+          {isLoading && <div className="p-4"><PageSkeleton /></div>}
 
           {loadError && <p role="alert" className="p-6 text-sm text-destructive">Impossible de charger les transactions.</p>}
           {!isLoading && !loadError && filtered?.length === 0 && (

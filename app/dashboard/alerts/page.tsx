@@ -7,6 +7,7 @@ import { Bell, Check, CircleAlert, Target, TriangleAlert } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 type Alert = {
   id: string
@@ -63,7 +64,7 @@ export default function AlertsPage() {
 
       <Card>
         <CardContent className="p-0">
-          {isLoading && <p className="p-6 text-sm text-muted-foreground">Chargement...</p>}
+          {isLoading && <div className="p-4"><PageSkeleton /></div>}
           {error && (
             <p role="alert" className="p-6 text-sm text-destructive">
               Impossible de charger les alertes. Réessaie plus tard.
