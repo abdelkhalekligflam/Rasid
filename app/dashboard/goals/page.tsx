@@ -44,6 +44,8 @@ function ContributeDialog({ goal }: { goal: Goal }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals"] })
+      queryClient.invalidateQueries({ queryKey: ["unread-alert-count"] })
+      queryClient.invalidateQueries({ queryKey: ["alerts"] })
       setAmount("")
       setOpen(false)
     },
