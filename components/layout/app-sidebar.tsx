@@ -51,12 +51,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="px-4 py-4">
-        <span className="text-xl font-heading font-semibold text-primary">
-          Rasid
+      <SidebarHeader className="border-b px-5 py-5">
+        <span className="text-lg font-heading font-semibold tracking-[-0.04em] text-foreground">
+          rasid<span className="text-emerald-500">.</span>
         </span>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-2 py-5">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -67,7 +67,7 @@ export function AppSidebar() {
                       <item.icon />
                       <span>{item.title}</span>
                       {item.url === "/dashboard/alerts" && !!unreadCount && (
-                        <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground" aria-label={`${unreadCount} alertes non lues`}>
+                        <span className="ml-auto rounded-full bg-foreground px-2 py-0.5 text-xs font-semibold text-background" aria-label={`${unreadCount} alertes non lues`}>
                           {unreadCount > 99 ? "99+" : unreadCount}
                         </span>
                       )}

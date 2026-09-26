@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 
 type MonthlyPoint = { month: string; revenus: number; depenses: number }
 type CategoryPoint = { name: string; value: number }
-const colors = ["#10B981", "#059669", "#64748B", "#94A3B8", "#F59E0B", "#BA1A1A"]
+const colors = ["#171717", "#10b981", "#737373", "#a3a3a3", "#d4d4d4", "#f59e0b"]
 
 export function DashboardCharts({
   monthlyData,
@@ -26,7 +26,7 @@ export function DashboardCharts({
     <div className="grid gap-4 xl:grid-cols-5">
       <motion.div className="xl:col-span-3" initial={reduceMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-      <Card className="h-full rounded-2xl shadow-sm">
+      <Card className="h-full rounded-xl shadow-none">
         <CardContent className="p-5">
           <h2 className="font-heading text-lg font-semibold">Évolution mensuelle</h2>
           <p className="mb-6 text-sm text-muted-foreground">Revenus et dépenses sur 6 mois</p>
@@ -37,21 +37,21 @@ export function DashboardCharts({
                 <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} width={48} />
                 <Tooltip formatter={(value) => money(Number(value))} />
-                <Bar dataKey="revenus" name="Revenus" fill="var(--primary)" radius={[5, 5, 0, 0]} />
-                <Bar dataKey="depenses" name="Dépenses" fill="#94A3B8" radius={[5, 5, 0, 0]} />
+                <Bar dataKey="revenus" name="Revenus" fill="var(--chart-1)" radius={[5, 5, 0, 0]} />
+                <Bar dataKey="depenses" name="Dépenses" fill="var(--chart-2)" radius={[5, 5, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="mt-3 flex gap-5 text-xs text-muted-foreground">
-            <span><span className="mr-2 inline-block size-2 rounded-full bg-primary" />Revenus</span>
-            <span><span className="mr-2 inline-block size-2 rounded-full bg-slate-400" />Dépenses</span>
+            <span><span className="mr-2 inline-block size-2 rounded-full bg-foreground" />Revenus</span>
+            <span><span className="mr-2 inline-block size-2 rounded-full bg-emerald-500" />Dépenses</span>
           </div>
         </CardContent>
       </Card>
       </motion.div>
       <motion.div className="xl:col-span-2" initial={reduceMotion ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.08 }}>
-      <Card className="h-full rounded-2xl shadow-sm">
+      <Card className="h-full rounded-xl shadow-none">
         <CardContent className="p-5">
           <h2 className="font-heading text-lg font-semibold">Par catégorie</h2>
           <p className="mb-3 text-sm text-muted-foreground">Dépenses du mois</p>

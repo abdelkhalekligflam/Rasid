@@ -73,8 +73,8 @@ export default function SignupPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
       <div className="absolute -top-32 left-0 size-96 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
       <div className="relative w-full max-w-md">
-      <Link href="/" className="mb-7 block text-center font-heading text-3xl font-bold text-primary">rasid<span className="text-foreground">.</span></Link>
-      <Card className="w-full rounded-2xl border-border/70 shadow-xl shadow-primary/5">
+      <Link href="/" className="mb-7 block text-center font-heading text-2xl font-semibold tracking-[-0.05em] text-foreground">rasid<span className="text-foreground">.</span></Link>
+      <Card className="w-full rounded-xl border-border shadow-none">
         <CardHeader>
           <CardTitle className="text-2xl font-heading">
             Créer ton compte Rasid
@@ -160,7 +160,7 @@ export default function SignupPage() {
 
             <p className="text-sm text-center text-muted-foreground">
               Déjà un compte ?{" "}
-              <Link href="/login" className="text-primary font-medium hover:underline">
+              <Link href="/login" className="text-foreground underline underline-offset-4 font-medium hover:underline">
                 Se connecter
               </Link>
             </p>

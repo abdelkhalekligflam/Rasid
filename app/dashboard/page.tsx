@@ -70,14 +70,14 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div>
         <p className="text-sm text-muted-foreground">Vue d&apos;ensemble · {format(today, "MMMM yyyy", { locale: fr })}</p>
-        <h1 className="mt-1 text-3xl font-heading font-semibold">Bonjour, {profile?.full_name?.split(" ")[0] || "toi"} 👋</h1>
+        <h1 className="mt-1 text-3xl font-heading font-semibold tracking-tight">Bonjour, {profile?.full_name?.split(" ")[0] || "toi"}</h1>
         <p className="mt-2 text-sm text-muted-foreground">Voici où en sont tes finances aujourd&apos;hui.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map(({ label, value, icon: Icon }) => (
-          <Card key={label} className="rounded-2xl shadow-sm">
+          <Card key={label} className="rounded-xl shadow-none">
             <CardContent className="space-y-5 p-5">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex size-10 items-center justify-center rounded-lg border bg-muted text-foreground">
                 <Icon className="size-5" aria-hidden="true" />
               </div>
               <div>
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
         ))}
       </div>
       <DashboardCharts monthlyData={monthlyData} categoryData={categoryData} currency={currency} />
-      <Card className="rounded-2xl shadow-sm">
+      <Card className="rounded-xl shadow-none">
         <CardContent className="p-0">
           <h2 className="px-6 py-5 font-heading text-lg font-semibold">Transactions récentes</h2>
           {transactions.length === 0 && <p className="border-t px-6 py-8 text-sm text-muted-foreground">Aucune transaction pour l&apos;instant.</p>}
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                 <p className="text-sm font-medium">{tx.categories?.name || "Sans catégorie"}</p>
                 <p className="text-xs text-muted-foreground">{tx.transaction_date}</p>
               </div>
-              <p className={`font-medium tabular-nums ${tx.type === "income" ? "text-primary" : ""}`}>
+              <p className={`font-medium tabular-nums ${tx.type === "income" ? "text-emerald-600 dark:text-emerald-400" : ""}`}>
                 {tx.type === "income" ? "+" : "−"}{money(Number(tx.amount))}
               </p>
             </div>

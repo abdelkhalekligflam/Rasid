@@ -49,7 +49,7 @@ export default async function DashboardLayout({
     <SidebarProvider>
       <AppSidebar />
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center justify-between h-14 px-4 border-b bg-background sticky top-0 z-10">
+        <header className="flex items-center justify-between h-16 px-5 sm:px-8 border-b bg-background sticky top-0 z-10">
           <SidebarTrigger />
           <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -75,7 +75,7 @@ export default async function DashboardLayout({
           </DropdownMenu>
           </div>
         </header>
-        <main className="flex-1 p-6">{children}</main>
+        <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 sm:px-8 sm:py-10">{children}</main>
       </div>
     </SidebarProvider>
   )
