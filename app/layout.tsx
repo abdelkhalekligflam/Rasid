@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ToastViewport } from "@/components/shared/toast";
 import { QueryProvider } from "@/components/query-provider";
 
 const geist = Geist({
@@ -37,7 +38,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>{children}<ToastViewport /></TooltipProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

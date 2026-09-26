@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { ConfirmAction } from "@/components/shared/confirm-action"
+import { notify } from "@/components/shared/toast"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Pencil, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -23,6 +25,7 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [type, setType] = useState(transaction.type)
   const [categoryId, setCategoryId] = useState(transaction.category_id || "")
   const [amount, setAmount] = useState(String(transaction.amount))
@@ -62,7 +65,8 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
       const { error } = await supabase.from("transactions").delete().eq("id", transaction.id)
       if (error) throw error
     },
-    onSuccess: refresh,
+    onSuccess: () => { refresh(); setConfirmOpen(false); notify("Transaction supprimée.") },
+    onError: () => notify("Impossible de supprimer la transaction.", true),
   })
 
   return (
@@ -74,14 +78,13 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
         <Button
           size="icon-sm" variant="ghost" aria-label="Supprimer la transaction"
           disabled={remove.isPending}
-          onClick={() => {
-            if (window.confirm("Supprimer cette transaction ?")) remove.mutate()
-          }}
+          onClick={() => setConfirmOpen(true)}
         >
           <Trash2 aria-hidden="true" />
         </Button>
       </div>
       {remove.isError && <p role="alert" className="text-xs text-destructive">Suppression impossible.</p>}
+      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title="Supprimer la transaction ?" description="Cette action supprimera définitivement cette transaction de ton historique." action="Supprimer" destructive pending={remove.isPending} onConfirm={() => remove.mutate()} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Modifier la transaction</DialogTitle></DialogHeader>

@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { ConfirmAction } from "@/components/shared/confirm-action"
+import { notify } from "@/components/shared/toast"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Pencil, Archive } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -15,6 +17,7 @@ export function BudgetActions({ budget }: { budget: Budget }) {
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [amount, setAmount] = useState(String(budget.amount_limit))
   const [recurrence, setRecurrence] = useState(budget.recurrence)
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["budgets"] })
@@ -34,7 +37,8 @@ export function BudgetActions({ budget }: { budget: Budget }) {
         .update({ is_active: false }).eq("id", budget.id)
       if (error) throw error
     },
-    onSuccess: refresh,
+    onSuccess: () => { refresh(); setConfirmOpen(false); notify("Budget archivé.") },
+    onError: () => notify("Impossible d’archiver le budget.", true),
   })
   return (
     <>
@@ -43,11 +47,12 @@ export function BudgetActions({ budget }: { budget: Budget }) {
           <Pencil aria-hidden="true" />
         </Button>
         <Button size="icon-sm" variant="ghost" aria-label="Archiver le budget" disabled={archive.isPending}
-          onClick={() => { if (window.confirm("Archiver ce budget ?")) archive.mutate() }}>
+          onClick={() => setConfirmOpen(true)}>
           <Archive aria-hidden="true" />
         </Button>
       </div>
       {archive.isError && <p role="alert" className="text-xs text-destructive">Archivage impossible.</p>}
+      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title="Archiver ce budget ?" description="Ce budget ne sera plus suivi dans les périodes à venir." action="Archiver" pending={archive.isPending} onConfirm={() => archive.mutate()} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Modifier {budget.categories?.name || "le budget"}</DialogTitle></DialogHeader>

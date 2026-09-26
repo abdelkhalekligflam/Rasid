@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 
 type MonthlyPoint = { month: string; revenus: number; depenses: number }
 type CategoryPoint = { name: string; value: number }
-const colors = ["#171717", "#10b981", "#737373", "#a3a3a3", "#d4d4d4", "#f59e0b"]
+const colors = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"]
 
 export function DashboardCharts({
   monthlyData,
@@ -21,6 +21,7 @@ export function DashboardCharts({
     new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount)
   const sortedCategories = [...categoryData].sort((a, b) => b.value - a.value)
   const reduceMotion = useReducedMotion()
+  const hasMonthlyActivity = monthlyData.some((point) => point.revenus > 0 || point.depenses > 0)
 
   return (
     <div className="grid gap-4 xl:grid-cols-5">
@@ -30,22 +31,22 @@ export function DashboardCharts({
         <CardContent className="p-5">
           <h2 className="font-heading text-lg font-semibold">Évolution mensuelle</h2>
           <p className="mb-6 text-sm text-muted-foreground">Revenus et dépenses sur 6 mois</p>
-          <div role="img" aria-label="Graphique des revenus et dépenses des six derniers mois" className="h-64 w-full">
+          {hasMonthlyActivity ? <div role="img" aria-label="Graphique des revenus et dépenses des six derniers mois" className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} width={48} />
-                <Tooltip formatter={(value) => money(Number(value))} />
+                <Tooltip cursor={false} contentStyle={{ background: "var(--popover)", color: "var(--popover-foreground)", border: "1px solid var(--border)", borderRadius: 8 }} labelStyle={{ color: "var(--popover-foreground)" }} itemStyle={{ color: "var(--popover-foreground)" }} formatter={(value) => money(Number(value))} />
                 <Bar dataKey="revenus" name="Revenus" fill="var(--chart-1)" radius={[5, 5, 0, 0]} />
                 <Bar dataKey="depenses" name="Dépenses" fill="var(--chart-2)" radius={[5, 5, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
-          <div className="mt-3 flex gap-5 text-xs text-muted-foreground">
+          </div> : <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">Ajoute une transaction pour afficher ton évolution.</div>}
+          {hasMonthlyActivity && <div className="mt-3 flex gap-5 text-xs text-muted-foreground">
             <span><span className="mr-2 inline-block size-2 rounded-full bg-foreground" />Revenus</span>
             <span><span className="mr-2 inline-block size-2 rounded-full bg-emerald-500" />Dépenses</span>
-          </div>
+          </div>}
         </CardContent>
       </Card>
       </motion.div>
@@ -65,7 +66,7 @@ export function DashboardCharts({
                     <Pie data={sortedCategories} dataKey="value" nameKey="name" innerRadius={52} outerRadius={78} paddingAngle={3}>
                       {sortedCategories.map((item, index) => <Cell key={item.name} fill={colors[index % colors.length]} />)}
                     </Pie>
-                    <Tooltip formatter={(value) => money(Number(value))} />
+                    <Tooltip cursor={false} contentStyle={{ background: "var(--popover)", color: "var(--popover-foreground)", border: "1px solid var(--border)", borderRadius: 8 }} labelStyle={{ color: "var(--popover-foreground)" }} itemStyle={{ color: "var(--popover-foreground)" }} formatter={(value) => money(Number(value))} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>

@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { ConfirmAction } from "@/components/shared/confirm-action"
+import { notify } from "@/components/shared/toast"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Pencil, Plus, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -24,6 +26,7 @@ export default function CategoriesPage() {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
+  const [confirmCategory, setConfirmCategory] = useState<Category | null>(null)
   const [name, setName] = useState("")
   const [type, setType] = useState<"income" | "expense">("expense")
   const [color, setColor] = useState("#10B981")
@@ -67,8 +70,8 @@ export default function CategoriesPage() {
         .eq("id", category.id).eq("is_default", false)
       if (error) throw error
     },
-    onSuccess: refresh,
-    onError: () => setActionError("Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des transactions ou budgets."),
+    onSuccess: () => { refresh(); setConfirmCategory(null); notify("Catégorie supprimée.") },
+    onError: () => { notify("Impossible de supprimer cette catégorie.", true); setActionError("Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des transactions ou budgets.") },
   })
   const startCreate = () => {
     setEditing(null); setName(""); setType("expense"); setColor("#10B981"); setActionError(""); setOpen(true)
@@ -109,7 +112,7 @@ export default function CategoriesPage() {
                   disabled={remove.isPending}
                   onClick={() => {
                     setActionError("")
-                    if (window.confirm(`Supprimer la catégorie « ${category.name} » ?`)) remove.mutate(category)
+                    setConfirmCategory(category)
                   }}>
                   <Trash2 aria-hidden="true" />
                 </Button>
@@ -118,6 +121,7 @@ export default function CategoriesPage() {
           </div>
         ))}
       </CardContent></Card>
+      <ConfirmAction open={!!confirmCategory} onOpenChange={(value) => { if (!value) setConfirmCategory(null) }} title="Supprimer la catégorie ?" description={`La catégorie « ${confirmCategory?.name || ""} » sera supprimée si elle n’est utilisée par aucune transaction ou budget.`} action="Supprimer" destructive pending={remove.isPending} onConfirm={() => { if (confirmCategory) remove.mutate(confirmCategory) }} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editing ? "Modifier la catégorie" : "Nouvelle catégorie"}</DialogTitle></DialogHeader>
