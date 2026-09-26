@@ -17,6 +17,7 @@ export default function TransactionsPage() {
   const money = useCurrency()
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
   const [monthFilter, setMonthFilter] = useState("")
 
   const { data: transactions, isLoading, error: loadError } = useQuery({
@@ -38,9 +39,13 @@ export default function TransactionsPage() {
   })
   const filtered = transactions?.filter((tx) =>
     (typeFilter === "all" || tx.type === typeFilter) &&
+    (categoryFilter === "all" || tx.category_id === categoryFilter) &&
     (!monthFilter || tx.transaction_date.startsWith(monthFilter)) &&
     (!search || `${tx.categories?.name || ""} ${tx.description || ""}`.toLowerCase().includes(search.toLowerCase()))
   )
+  const categories = [...new Map(
+    transactions?.filter((tx) => tx.category_id).map((tx) => [tx.category_id, tx.categories?.name || "Sans catégorie"]) || []
+  )]
 
   return (
     <div className="space-y-6">
@@ -54,10 +59,15 @@ export default function TransactionsPage() {
         <AddTransactionDialog />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Input aria-label="Rechercher les transactions" placeholder="Rechercher..." value={search} onChange={(event) => setSearch(event.target.value)} />
         <select aria-label="Filtrer par type" className="h-9 rounded-md border bg-background px-3 text-sm" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
           <option value="all">Tous les types</option><option value="expense">Dépenses</option><option value="income">Revenus</option>
+        </select>
+        <select aria-label="Filtrer par catégorie" className="h-9 rounded-md border bg-background px-3 text-sm"
+          value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+          <option value="all">Toutes les catégories</option>
+          {categories.map(([id, name]) => <option key={id} value={id || ""}>{name}</option>)}
         </select>
         <Input aria-label="Filtrer par mois" type="month" value={monthFilter} onChange={(event) => setMonthFilter(event.target.value)} />
       </div>
