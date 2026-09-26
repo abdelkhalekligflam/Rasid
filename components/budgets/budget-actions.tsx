@@ -1,5 +1,7 @@
 "use client"
 
+import { useT } from "@/components/locale-provider"
+
 import { useState } from "react"
 import { ConfirmAction } from "@/components/shared/confirm-action"
 import { notify } from "@/components/shared/toast"
@@ -14,6 +16,7 @@ import { Label } from "@/components/ui/label"
 type Budget = { id: string; amount_limit: number; recurrence: "weekly" | "monthly" | "yearly"; categories: { name: string } | null }
 
 export function BudgetActions({ budget }: { budget: Budget }) {
+  const t = useT()
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
@@ -43,35 +46,35 @@ export function BudgetActions({ budget }: { budget: Budget }) {
   return (
     <>
       <div className="flex gap-1">
-        <Button size="icon-sm" variant="ghost" aria-label="Modifier le budget" onClick={() => setOpen(true)}>
+        <Button size="icon-sm" variant="ghost" aria-label={t("Edit budget")} onClick={() => setOpen(true)}>
           <Pencil aria-hidden="true" />
         </Button>
-        <Button size="icon-sm" variant="ghost" aria-label="Archiver le budget" disabled={archive.isPending}
+        <Button size="icon-sm" variant="ghost" aria-label={t("Archive budget")} disabled={archive.isPending}
           onClick={() => setConfirmOpen(true)}>
           <Archive aria-hidden="true" />
         </Button>
       </div>
-      {archive.isError && <p role="alert" className="text-xs text-destructive">Archivage impossible.</p>}
-      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title="Archiver ce budget ?" description="Ce budget ne sera plus suivi dans les périodes à venir." action="Archiver" pending={archive.isPending} onConfirm={() => archive.mutate()} />
+      {archive.isError && <p role="alert" className="text-xs text-destructive">{t("Couldn't archive the budget.")}</p>}
+      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title={t("Archive this budget?")} description={t("This budget won't be tracked in future periods.")} action={t("Archive")} pending={archive.isPending} onConfirm={() => archive.mutate()} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Modifier {budget.categories?.name || "le budget"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("Edit budget")} · {budget.categories?.name || t("Uncategorized")}</DialogTitle></DialogHeader>
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); update.mutate() }}>
             <div className="space-y-2">
-              <Label htmlFor={`limit-${budget.id}`}>Plafond</Label>
+              <Label htmlFor={`limit-${budget.id}`}>{t('Limit')}</Label>
               <Input id={`limit-${budget.id}`} type="number" min="0.01" step="0.01" required
                 value={amount} onChange={(event) => setAmount(event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`recurrence-${budget.id}`}>Récurrence</Label>
+              <Label htmlFor={`recurrence-${budget.id}`}>{t('Recurrence')}</Label>
               <select id={`recurrence-${budget.id}`} value={recurrence}
                 onChange={(event) => setRecurrence(event.target.value as Budget["recurrence"])}
                 className="w-full rounded-md border bg-background p-2 text-sm">
-                <option value="weekly">Hebdomadaire</option><option value="monthly">Mensuel</option><option value="yearly">Annuel</option>
+                <option value="weekly">{t('Weekly')}</option><option value="monthly">{t('Monthly')}</option><option value="yearly">{t('Yearly')}</option>
               </select>
             </div>
             {update.error && <p role="alert" className="text-sm text-destructive">{update.error.message}</p>}
-            <Button type="submit" disabled={update.isPending} className="w-full">Enregistrer</Button>
+            <Button type="submit" disabled={update.isPending} className="w-full">{t('Save')}</Button>
           </form>
         </DialogContent>
       </Dialog>

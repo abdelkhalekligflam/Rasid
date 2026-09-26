@@ -1,5 +1,8 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+
+import { translateLegacy } from "@/lib/i18n"
 import { useState } from "react"
 import { z } from "zod"
 import { useForm, useWatch } from "react-hook-form"
@@ -24,6 +27,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 
 export function AddGoalDialog() {
+  const t = useT()
+  const locale = useLocale()
   const [open, setOpen] = useState(false)
   const supabase = createClient()
   const queryClient = useQueryClient()
@@ -77,23 +82,23 @@ export function AddGoalDialog() {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-heading">Nouvel objectif</DialogTitle>
+          <DialogTitle className="font-heading">{t('New goal')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nom de l&apos;objectif</Label>
+            <Label htmlFor="name">{t('Goal name')}</Label>
             <Input
               id="name"
-              placeholder="Ex : Fonds d'urgence"
+              placeholder={t("e.g. Emergency fund")}
               {...register("name")}
             />
             {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
+              <p className="text-sm text-destructive">{translateLegacy(locale, errors.name.message || "")}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="targetAmount">Montant cible</Label>
+            <Label htmlFor="targetAmount">{t('Target amount')}</Label>
             <Input
               id="targetAmount"
               type="number"
@@ -103,13 +108,13 @@ export function AddGoalDialog() {
             />
             {errors.targetAmount && (
               <p className="text-sm text-destructive">
-                {errors.targetAmount.message}
+                {translateLegacy(locale, errors.targetAmount.message || "")}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>Date cible (optionnel)</Label>
+            <Label>{t('Target date (optional)')}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -123,7 +128,7 @@ export function AddGoalDialog() {
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {selectedDate
                     ? format(selectedDate, "dd/MM/yyyy")
-                    : "Choisir une date"}
+                    : t("Choose a date")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -137,7 +142,7 @@ export function AddGoalDialog() {
           </div>
 
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
-            {mutation.isPending ? "Création..." : "Créer l'objectif"}
+            {mutation.isPending ? t("Creating...") : t("Create goal")}
           </Button>
           {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
         </form>

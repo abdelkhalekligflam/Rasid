@@ -1,9 +1,12 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { format } from "date-fns"
-import { fr } from "date-fns/locale"
+import { fr, enUS, arMA } from "date-fns/locale"
+
 import { createClient } from "@/lib/supabase/client"
 import { AddGoalDialog } from "@/components/goals/add-goal-dialog"
 import { Card, CardContent } from "@/components/ui/card"
@@ -29,6 +32,7 @@ type Goal = {
 }
 
 function ContributeDialog({ goal }: { goal: Goal }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState("")
   const supabase = createClient()
@@ -37,7 +41,7 @@ function ContributeDialog({ goal }: { goal: Goal }) {
   const mutation = useMutation({
     mutationFn: async () => {
       const value = parseFloat(amount)
-      if (isNaN(value) || value <= 0) throw new Error("Montant invalide")
+      if (isNaN(value) || value <= 0) throw new Error(t("Invalid amount"))
 
       const { error } = await supabase.rpc("contribute_to_goal", {
         goal_id: goal.id, amount_to_add: value,
@@ -57,13 +61,13 @@ function ContributeDialog({ goal }: { goal: Goal }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
-          Alimenter
+          {t('Add funds')}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="font-heading">
-            Alimenter &quot;{goal.name}&quot;
+            {t("Add funds to")} &quot;{goal.name}&quot;
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
@@ -71,7 +75,7 @@ function ContributeDialog({ goal }: { goal: Goal }) {
             type="number"
             min="0.01"
             step="0.01"
-            placeholder="Montant à ajouter"
+            placeholder={t("Amount to add")}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
@@ -81,7 +85,7 @@ function ContributeDialog({ goal }: { goal: Goal }) {
             disabled={mutation.isPending}
             onClick={() => mutation.mutate()}
           >
-            {mutation.isPending ? "Ajout..." : "Confirmer"}
+            {mutation.isPending ? t("Adding...") : t("Confirm")}
           </Button>
         </div>
       </DialogContent>
@@ -90,6 +94,9 @@ function ContributeDialog({ goal }: { goal: Goal }) {
 }
 
 export default function GoalsPage() {
+  const t = useT()
+  const locale = useLocale()
+  const dateLocale = locale === "ar" ? arMA : locale === "fr" ? fr : enUS
   const supabase = createClient()
   const money = useCurrency()
 
@@ -110,21 +117,21 @@ export default function GoalsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-semibold">
-            Objectifs d&apos;épargne
+            {t('Savings goals')}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Suis ta progression vers tes objectifs
+            {t('Track your progress toward your goals')}
           </p>
         </div>
         <AddGoalDialog />
       </div>
 
       {isLoading && <PageSkeleton />}
-      {loadError && <p role="alert" className="text-sm text-destructive">Impossible de charger les objectifs.</p>}
+      {loadError && <p role="alert" className="text-sm text-destructive">{t("Couldn't load goals.")}</p>}
 
       {!isLoading && goals?.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Aucun objectif pour l&apos;instant. Crée le premier !
+          {t('No goals yet. Create your first one!')}
         </p>
       )}
 
@@ -144,9 +151,9 @@ export default function GoalsPage() {
                   <div className="flex items-center gap-2">
                   {goal.target_date && (
                     <span className="text-xs text-muted-foreground">
-                      Échéance :{" "}
+                      {t("Target date:")}{" "}
                       {format(new Date(goal.target_date), "MMM yyyy", {
-                        locale: fr,
+                        locale: dateLocale,
                       })}
                     </span>
                   )}
@@ -174,7 +181,7 @@ export default function GoalsPage() {
 
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    {reached ? "Objectif atteint 🎉" : `${percent}% complété`}
+                    {reached ? t("Goal reached 🎉") : `${percent}% ${t("complete")}`}
                   </p>
                   {!reached && <ContributeDialog goal={goal} />}
                 </div>

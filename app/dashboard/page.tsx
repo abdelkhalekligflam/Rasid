@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation"
 import { format, startOfMonth, subMonths } from "date-fns"
-import { fr } from "date-fns/locale"
+import { fr, enUS, arMA } from "date-fns/locale"
+import { getLocale } from "@/lib/i18n-server"
+import { translate, localeTags, categoryName } from "@/lib/i18n"
 import { ArrowDownLeft, ArrowUpRight, PiggyBank, Wallet } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent } from "@/components/ui/card"
@@ -15,6 +17,9 @@ type Transaction = {
 }
 
 export default async function DashboardPage() {
+  const locale = await getLocale()
+  const t = (key: string) => translate(locale, key)
+  const dateLocale = locale === "ar" ? arMA : locale === "fr" ? fr : enUS
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
@@ -35,7 +40,7 @@ export default async function DashboardPage() {
   }
   const currency = profile?.currency || "MAD"
   const money = (amount: number) =>
-    new Intl.NumberFormat("fr-FR", { style: "currency", currency }).format(amount)
+    new Intl.NumberFormat(localeTags[locale], { style: "currency", currency }).format(amount)
   const today = new Date()
   const monthKey = format(today, "yyyy-MM")
   const current = transactions.filter((tx) => tx.transaction_date.startsWith(monthKey))
@@ -46,7 +51,7 @@ export default async function DashboardPage() {
   const categories = new Map<string, number>()
   for (const tx of current) {
     if (tx.type !== "expense") continue
-    const name = tx.categories?.name || "Sans catégorie"
+    const name = tx.categories?.name ? categoryName(locale, tx.categories.name) : t("Uncategorized")
     categories.set(name, (categories.get(name) ?? 0) + Number(tx.amount))
   }
   const categoryData = [...categories].map(([name, value]) => ({ name, value }))
@@ -54,24 +59,24 @@ export default async function DashboardPage() {
     const date = startOfMonth(subMonths(today, 5 - index))
     const entries = transactions.filter((tx) => tx.transaction_date.startsWith(format(date, "yyyy-MM")))
     return {
-      month: format(date, "MMM", { locale: fr }),
+      month: format(date, "MMM", { locale: dateLocale }),
       revenus: entries.filter((tx) => tx.type === "income").reduce((sum, tx) => sum + Number(tx.amount), 0),
       depenses: entries.filter((tx) => tx.type === "expense").reduce((sum, tx) => sum + Number(tx.amount), 0),
     }
   })
   const stats = [
-    { label: "Solde total", value: balance, icon: Wallet },
-    { label: "Revenus du mois", value: income, icon: ArrowDownLeft },
-    { label: "Dépenses du mois", value: expenses, icon: ArrowUpRight },
-    { label: "Épargne suivie", value: saved, icon: PiggyBank },
+    { label: t("Total balance"), value: balance, icon: Wallet },
+    { label: t("Monthly income"), value: income, icon: ArrowDownLeft },
+    { label: t("Monthly expenses"), value: expenses, icon: ArrowUpRight },
+    { label: t("Tracked savings"), value: saved, icon: PiggyBank },
   ]
 
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-sm text-muted-foreground">Vue d&apos;ensemble · {format(today, "MMMM yyyy", { locale: fr })}</p>
-        <h1 className="mt-1 text-3xl font-heading font-semibold tracking-tight">Bonjour, {profile?.full_name?.split(" ")[0] || "toi"}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Voici où en sont tes finances aujourd&apos;hui.</p>
+        <p className="text-sm text-muted-foreground">{t("Overview")} · {format(today, "MMMM yyyy", { locale: dateLocale })}</p>
+        <h1 className="mt-1 text-3xl font-heading font-semibold tracking-tight">{t("Welcome,")} {profile?.full_name?.split(" ")[0] || ""}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("Here's where your finances stand today.")}</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map(({ label, value, icon: Icon }) => (
@@ -91,12 +96,12 @@ export default async function DashboardPage() {
       <DashboardCharts monthlyData={monthlyData} categoryData={categoryData} currency={currency} />
       <Card className="rounded-xl shadow-none">
         <CardContent className="p-0">
-          <h2 className="px-6 py-5 font-heading text-lg font-semibold">Transactions récentes</h2>
-          {transactions.length === 0 && <p className="border-t px-6 py-8 text-sm text-muted-foreground">Aucune transaction pour l&apos;instant.</p>}
+          <h2 className="px-6 py-5 font-heading text-lg font-semibold">{t("Recent transactions")}</h2>
+          {transactions.length === 0 && <p className="border-t px-6 py-8 text-sm text-muted-foreground">{t("No transactions yet.")}</p>}
           {transactions.slice(0, 5).map((tx) => (
             <div key={tx.id} className="flex items-center justify-between gap-4 border-t px-6 py-4">
               <div>
-                <p className="text-sm font-medium">{tx.categories?.name || "Sans catégorie"}</p>
+                <p className="text-sm font-medium">{tx.categories?.name ? categoryName(locale, tx.categories.name) : t("Uncategorized")}</p>
                 <p className="text-xs text-muted-foreground">{tx.transaction_date}</p>
               </div>
               <p className={`font-medium tabular-nums ${tx.type === "income" ? "text-emerald-600 dark:text-emerald-400" : ""}`}>

@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastViewport } from "@/components/shared/toast";
+import { getLocale } from "@/lib/i18n-server";
+import { LocaleProvider } from "@/components/locale-provider";
 import { QueryProvider } from "@/components/query-provider";
 
 const geist = Geist({
@@ -18,16 +20,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Rasid",
-  description: "Suivi de budgets simple et intelligent",
+  description: "Track budgets, transactions and savings goals with clarity",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale()
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} suppressHydrationWarning>
       <body
         className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}
       >
@@ -38,7 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <TooltipProvider>{children}<ToastViewport /></TooltipProvider>
+            <LocaleProvider locale={locale}><TooltipProvider>{children}<ToastViewport /></TooltipProvider></LocaleProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

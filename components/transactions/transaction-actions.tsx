@@ -1,5 +1,8 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+import { categoryName } from "@/lib/i18n"
+
 import { useState } from "react"
 import { ConfirmAction } from "@/components/shared/confirm-action"
 import { notify } from "@/components/shared/toast"
@@ -22,6 +25,8 @@ export type TransactionRow = {
 }
 
 export function TransactionActions({ transaction }: { transaction: TransactionRow }) {
+  const t = useT()
+  const locale = useLocale()
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
@@ -50,7 +55,7 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
     mutationFn: async () => {
       const value = Number(amount)
       if (!Number.isFinite(value) || value <= 0 || !categoryId || !date) {
-        throw new Error("Renseigne une catégorie, une date et un montant positif.")
+        throw new Error(t("Please enter a category, date and positive amount."))
       }
       const { error } = await supabase.from("transactions").update({
         type, category_id: categoryId, amount: value,
@@ -72,51 +77,51 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
   return (
     <>
       <div className="flex gap-1">
-        <Button size="icon-sm" variant="ghost" aria-label="Modifier la transaction" onClick={() => setOpen(true)}>
+        <Button size="icon-sm" variant="ghost" aria-label={t("Edit transaction")} onClick={() => setOpen(true)}>
           <Pencil aria-hidden="true" />
         </Button>
         <Button
-          size="icon-sm" variant="ghost" aria-label="Supprimer la transaction"
+          size="icon-sm" variant="ghost" aria-label={t("Delete transaction")}
           disabled={remove.isPending}
           onClick={() => setConfirmOpen(true)}
         >
           <Trash2 aria-hidden="true" />
         </Button>
       </div>
-      {remove.isError && <p role="alert" className="text-xs text-destructive">Suppression impossible.</p>}
-      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title="Supprimer la transaction ?" description="Cette action supprimera définitivement cette transaction de ton historique." action="Supprimer" destructive pending={remove.isPending} onConfirm={() => remove.mutate()} />
+      {remove.isError && <p role="alert" className="text-xs text-destructive">{t("Couldn't delete the transaction.")}</p>}
+      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title={t("Delete this transaction?")} description={t("This transaction will be permanently removed from your history.")} action={t("Delete")} destructive pending={remove.isPending} onConfirm={() => remove.mutate()} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Modifier la transaction</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('Edit transaction')}</DialogTitle></DialogHeader>
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); update.mutate() }}>
             <div className="space-y-2">
-              <Label htmlFor={`type-${transaction.id}`}>Type</Label>
+              <Label htmlFor={`type-${transaction.id}`}>{t('Type')}</Label>
               <select id={`type-${transaction.id}`} className="w-full rounded-md border bg-background p-2 text-sm"
                 value={type} onChange={(event) => { setType(event.target.value as "income" | "expense"); setCategoryId("") }}>
-                <option value="expense">Dépense</option><option value="income">Revenu</option>
+                <option value="expense">{t('Expense')}</option><option value="income">{t('Income item')}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`category-${transaction.id}`}>Catégorie</Label>
+              <Label htmlFor={`category-${transaction.id}`}>{t('Category')}</Label>
               <select id={`category-${transaction.id}`} required className="w-full rounded-md border bg-background p-2 text-sm"
                 value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-                <option value="">Choisir une catégorie</option>
+                <option value="">{t("Choose a category")}</option>
                 {categories?.filter((category) => category.type === type).map((category) =>
-                  <option key={category.id} value={category.id}>{category.name}</option>)}
+                  <option key={category.id} value={category.id}>{categoryName(locale, category.name)}</option>)}
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`amount-${transaction.id}`}>Montant</Label>
+              <Label htmlFor={`amount-${transaction.id}`}>{t('Amount')}</Label>
               <Input id={`amount-${transaction.id}`} type="number" min="0.01" step="0.01" required value={amount}
                 onChange={(event) => setAmount(event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`date-${transaction.id}`}>Date</Label>
+              <Label htmlFor={`date-${transaction.id}`}>{t('Date')}</Label>
               <Input id={`date-${transaction.id}`} type="date" required value={date}
                 onChange={(event) => setDate(event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`description-${transaction.id}`}>Description</Label>
+              <Label htmlFor={`description-${transaction.id}`}>{t('Description')}</Label>
               <Input id={`description-${transaction.id}`} value={description}
                 onChange={(event) => setDescription(event.target.value)} />
             </div>
@@ -126,7 +131,7 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
               </p>
             )}
             <Button type="submit" disabled={update.isPending} className="w-full">
-              {update.isPending ? "Enregistrement..." : "Enregistrer"}
+              {update.isPending ? t("Saving...") : t("Save")}
             </Button>
           </form>
         </DialogContent>

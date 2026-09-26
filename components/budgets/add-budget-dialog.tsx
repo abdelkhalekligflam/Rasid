@@ -1,5 +1,9 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+import { categoryName } from "@/lib/i18n"
+
+import { translateLegacy } from "@/lib/i18n"
 import { useState } from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
@@ -34,6 +38,8 @@ type Category = {
 }
 
 export function AddBudgetDialog() {
+  const t = useT()
+  const locale = useLocale()
   const [open, setOpen] = useState(false)
   const supabase = createClient()
   const queryClient = useQueryClient()
@@ -97,33 +103,33 @@ export function AddBudgetDialog() {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-heading">Nouveau budget</DialogTitle>
+          <DialogTitle className="font-heading">{t('New budget')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>Catégorie</Label>
+            <Label>{t('Category')}</Label>
             <Select onValueChange={(val) => setValue("categoryId", val)}>
               <SelectTrigger>
-                <SelectValue placeholder="Choisir une catégorie" />
+                <SelectValue placeholder={t("Choose a category")} />
               </SelectTrigger>
               <SelectContent>
                 {categories?.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {categoryName(locale, cat.name)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {errors.categoryId && (
               <p className="text-sm text-destructive">
-                {errors.categoryId.message}
+                {translateLegacy(locale, errors.categoryId.message || "")}
               </p>
             )}
-            {categoryError && <p role="alert" className="text-sm text-destructive">Impossible de charger les catégories.</p>}
+            {categoryError && <p role="alert" className="text-sm text-destructive">{t("Couldn't load categories.")}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amountLimit">Plafond</Label>
+            <Label htmlFor="amountLimit">{t('Limit')}</Label>
             <Input
               id="amountLimit"
               type="number"
@@ -133,13 +139,13 @@ export function AddBudgetDialog() {
             />
             {errors.amountLimit && (
               <p className="text-sm text-destructive">
-                {errors.amountLimit.message}
+                {translateLegacy(locale, errors.amountLimit.message || "")}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>Récurrence</Label>
+            <Label>{t('Recurrence')}</Label>
             <Select
               defaultValue="monthly"
               onValueChange={(val) =>
@@ -150,15 +156,15 @@ export function AddBudgetDialog() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="weekly">Hebdomadaire</SelectItem>
-                <SelectItem value="monthly">Mensuel</SelectItem>
-                <SelectItem value="yearly">Annuel</SelectItem>
+                <SelectItem value="weekly">{t('Weekly')}</SelectItem>
+                <SelectItem value="monthly">{t('Monthly')}</SelectItem>
+                <SelectItem value="yearly">{t('Yearly')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
-            {mutation.isPending ? "Création..." : "Créer le budget"}
+            {mutation.isPending ? t("Creating...") : t("Create budget")}
           </Button>
           {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
         </form>

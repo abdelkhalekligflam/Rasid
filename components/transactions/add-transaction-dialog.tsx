@@ -1,5 +1,9 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+import { categoryName } from "@/lib/i18n"
+
+import { translateLegacy } from "@/lib/i18n"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
@@ -41,6 +45,8 @@ type Category = {
 }
 
 export function AddTransactionDialog() {
+  const t = useT()
+  const locale = useLocale()
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<"income" | "expense">("expense")
   const supabase = createClient()
@@ -113,7 +119,7 @@ export function AddTransactionDialog() {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-heading">Nouvelle transaction</DialogTitle>
+          <DialogTitle className="font-heading">{t('New transaction')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="flex gap-2">
@@ -144,29 +150,29 @@ export function AddTransactionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label>Catégorie</Label>
+            <Label>{t('Category')}</Label>
             <Select onValueChange={(val) => setValue("categoryId", val)}>
               <SelectTrigger>
-                <SelectValue placeholder="Choisir une catégorie" />
+                <SelectValue placeholder={t("Choose a category")} />
               </SelectTrigger>
               <SelectContent>
                 {filteredCategories?.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
+                    {categoryName(locale, cat.name)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {errors.categoryId && (
               <p className="text-sm text-destructive">
-                {errors.categoryId.message}
+                {translateLegacy(locale, errors.categoryId.message || "")}
               </p>
             )}
-            {categoryError && <p role="alert" className="text-sm text-destructive">Impossible de charger les catégories.</p>}
+            {categoryError && <p role="alert" className="text-sm text-destructive">{t("Couldn't load categories.")}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Montant</Label>
+            <Label htmlFor="amount">{t('Amount')}</Label>
             <Input
               id="amount"
               type="number"
@@ -176,13 +182,13 @@ export function AddTransactionDialog() {
             />
             {errors.amount && (
               <p className="text-sm text-destructive">
-                {errors.amount.message}
+                {translateLegacy(locale, errors.amount.message || "")}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>Date</Label>
+            <Label>{t('Date')}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -194,7 +200,7 @@ export function AddTransactionDialog() {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Choisir une date"}
+                  {selectedDate ? format(selectedDate, "dd/MM/yyyy") : t("Choose a date")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -208,16 +214,16 @@ export function AddTransactionDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description (optionnel)</Label>
+            <Label htmlFor="description">{t('Description (optional)')}</Label>
             <Textarea
               id="description"
-              placeholder="Ex : Courses Carrefour"
+              placeholder={t("e.g. Groceries")}
               {...register("description")}
             />
           </div>
 
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
-            {mutation.isPending ? "Ajout..." : "Ajouter"}
+            {mutation.isPending ? t("Adding...") : t("Add")}
           </Button>
           {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
         </form>

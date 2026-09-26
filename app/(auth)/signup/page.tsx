@@ -1,5 +1,8 @@
 "use client"
 
+import { LanguageSelect, useT, useLocale } from "@/components/locale-provider"
+
+import { translateLegacy } from "@/lib/i18n"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -21,6 +24,8 @@ import {
 const CURRENCIES = ["MAD", "EUR", "USD", "GBP"]
 
 export default function SignupPage() {
+  const t = useT()
+  const locale = useLocale()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -60,7 +65,7 @@ export default function SignupPage() {
     }
 
     if (!signUpData.session) {
-      setSuccess("Vérifie ta boîte mail pour confirmer ton compte, puis connecte-toi.")
+      setSuccess(t("Check your inbox to confirm your account, then sign in."))
       setLoading(false)
       return
     }
@@ -72,50 +77,51 @@ export default function SignupPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
       <div className="absolute -top-32 left-0 size-96 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+      <div className="absolute end-5 top-5"><LanguageSelect /></div>
       <div className="relative w-full max-w-md">
       <Link href="/" className="mb-7 block text-center font-heading text-2xl font-semibold tracking-[-0.05em] text-foreground">rasid<span className="text-foreground">.</span></Link>
       <Card className="w-full rounded-xl border-border shadow-none">
         <CardHeader>
           <CardTitle className="text-2xl font-heading">
-            Créer ton compte Rasid
+            {t('Create your Rasid account')}
           </CardTitle>
           <CardDescription>
-            Commence à suivre tes finances dès aujourd&apos;hui
+            {t('Start tracking your finances today')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Nom complet</Label>
+              <Label htmlFor="fullName">{t("Full name")}</Label>
               <Input
                 id="fullName"
-                placeholder="Ton nom"
+                placeholder={t('Your name')}
                 {...register("fullName")}
               />
               {errors.fullName && (
                 <p className="text-sm text-destructive">
-                  {errors.fullName.message}
+                  {translateLegacy(locale, errors.fullName.message || "")}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("Email")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="toi@exemple.com"
+                placeholder={t('you@example.com')}
                 {...register("email")}
               />
               {errors.email && (
                 <p className="text-sm text-destructive">
-                  {errors.email.message}
+                  {translateLegacy(locale, errors.email.message || "")}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">{t("Password")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -124,13 +130,13 @@ export default function SignupPage() {
               />
               {errors.password && (
                 <p className="text-sm text-destructive">
-                  {errors.password.message}
+                  {translateLegacy(locale, errors.password.message || "")}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="currency">Devise</Label>
+              <Label htmlFor="currency">{t("Currency")}</Label>
               <select
                 id="currency"
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
@@ -143,7 +149,7 @@ export default function SignupPage() {
                 ))}
               </select>
               <p className="text-xs text-muted-foreground">
-                Ce choix est définitif — toutes tes données seront affichées dans cette devise.
+                {t('This choice is permanent. All your data will use this currency.')}
               </p>
             </div>
 
@@ -155,13 +161,13 @@ export default function SignupPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Création..." : "Créer mon compte"}
+              {loading ? t("Creating...") : t("Create account")}
             </Button>
 
             <p className="text-sm text-center text-muted-foreground">
-              Déjà un compte ?{" "}
+              {t("Already have an account?")}{" "}
               <Link href="/login" className="text-foreground underline underline-offset-4 font-medium hover:underline">
-                Se connecter
+                {t('Sign in')}
               </Link>
             </p>
           </form>

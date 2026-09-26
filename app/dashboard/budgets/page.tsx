@@ -1,5 +1,8 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+import { categoryName } from "@/lib/i18n"
+
 import { useQuery } from "@tanstack/react-query"
 import { addMonths, addWeeks, addYears, differenceInCalendarDays, differenceInCalendarMonths, differenceInCalendarYears, format, parseISO } from "date-fns"
 import { createClient } from "@/lib/supabase/client"
@@ -41,6 +44,8 @@ function getBudgetPeriod(budget: Budget, today: Date) {
 }
 
 export default function BudgetsPage() {
+  const t = useT()
+  const locale = useLocale()
   const supabase = createClient()
   const money = useCurrency()
 
@@ -96,18 +101,18 @@ export default function BudgetsPage() {
   }
 
   const recurrenceLabel: Record<string, string> = {
-    weekly: "Hebdomadaire",
-    monthly: "Mensuel",
-    yearly: "Annuel",
+    weekly: t("Weekly"),
+    monthly: t("Monthly"),
+    yearly: t("Yearly"),
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-semibold">Budgets</h1>
+          <h1 className="text-2xl font-heading font-semibold">{t("Budgets")}</h1>
           <p className="text-muted-foreground text-sm">
-            Gère tes plafonds par catégorie
+            {t('Manage spending limits by category')}
           </p>
         </div>
         <AddBudgetDialog />
@@ -117,7 +122,7 @@ export default function BudgetsPage() {
 
       {!isLoading && budgets?.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          Aucun budget pour l&apos;instant. Crée le premier !
+          {t('No budgets yet. Create your first one!')}
         </p>
       )}
 
@@ -136,7 +141,7 @@ export default function BudgetsPage() {
               <CardContent className="p-6 space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-medium">
-                    {budget.categories?.name || "Sans catégorie"}
+                    {budget.categories?.name ? categoryName(locale, budget.categories.name) : t("Uncategorized")}
                   </p>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{recurrenceLabel[budget.recurrence]}</span>
@@ -176,8 +181,8 @@ export default function BudgetsPage() {
                   }`}
                 >
                   {isOver
-                    ? `Dépassement de ${money(spent - Number(budget.amount_limit))}`
-                    : `Reste ${money(Number(budget.amount_limit) - spent)}`}
+                    ? `${t("Over by")} ${money(spent - Number(budget.amount_limit))}`
+                    : `${t("Remaining")} ${money(Number(budget.amount_limit) - spent)}`}
                 </p>
               </CardContent>
             </Card>

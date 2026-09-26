@@ -1,10 +1,13 @@
 "use client"
 
+import { useLocale } from "@/components/locale-provider"
+import { localeTags } from "@/lib/i18n"
 import { useQuery } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 
 export function useCurrency() {
   const supabase = createClient()
+  const locale = useLocale()
   const { data } = useQuery({
     queryKey: ["profile-currency"],
     queryFn: async () => {
@@ -17,7 +20,7 @@ export function useCurrency() {
     },
   })
   return (amount: number) => data
-    ? new Intl.NumberFormat("fr-FR", {
+    ? new Intl.NumberFormat(localeTags[locale], {
       style: "currency", currency: data, minimumFractionDigits: 2,
     }).format(amount)
     : "—"

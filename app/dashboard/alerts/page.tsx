@@ -1,8 +1,12 @@
 "use client"
 
+import { useT } from "@/components/locale-provider"
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { format } from "date-fns"
-import { fr } from "date-fns/locale"
+import { fr, enUS, arMA } from "date-fns/locale"
+import { useLocale } from "@/components/locale-provider"
+import { alertMessage } from "@/lib/i18n"
 import { Bell, Check, CircleAlert, Target, TriangleAlert } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -20,10 +24,13 @@ type Alert = {
 const alertStyles = {
   threshold_warning: { icon: TriangleAlert, color: "text-amber-600", background: "bg-amber-500/10" },
   over_budget: { icon: CircleAlert, color: "text-destructive", background: "bg-destructive/10" },
-  goal_reached: { icon: Target, color: "text-primary", background: "bg-primary/10" },
+  goal_reached: { icon: Target, color: "text-emerald-600 dark:text-emerald-400", background: "bg-emerald-500/10" },
 }
 
 export default function AlertsPage() {
+  const t = useT()
+  const locale = useLocale()
+  const dateLocale = locale === "ar" ? arMA : locale === "fr" ? fr : enUS
   const supabase = createClient()
   const queryClient = useQueryClient()
   const { data: alerts, isLoading, error } = useQuery({
@@ -56,9 +63,9 @@ export default function AlertsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Alertes</h1>
+        <h1 className="text-2xl font-heading font-semibold">{t("Alerts")}</h1>
         <p className="text-sm text-muted-foreground">
-          Suis tes budgets et tes objectifs d&apos;épargne
+          {t('Stay on top of your budgets and savings goals')}
         </p>
       </div>
 
@@ -67,13 +74,13 @@ export default function AlertsPage() {
           {isLoading && <div className="p-4"><PageSkeleton /></div>}
           {error && (
             <p role="alert" className="p-6 text-sm text-destructive">
-              Impossible de charger les alertes. Réessaie plus tard.
+              {t("Couldn't load alerts. Try again later.")}
             </p>
           )}
           {!isLoading && !error && alerts?.length === 0 && (
             <div className="flex flex-col items-center gap-2 p-10 text-center text-muted-foreground">
               <Bell className="size-6" aria-hidden="true" />
-              <p className="text-sm">Aucune alerte pour l&apos;instant.</p>
+              <p className="text-sm">{t("No alerts yet.")}</p>
             </div>
           )}
           {alerts?.map((alert) => {
@@ -88,9 +95,9 @@ export default function AlertsPage() {
                   <Icon className="size-5" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className={alert.is_read ? "text-sm" : "text-sm font-semibold"}>{alert.message}</p>
+                  <p className={alert.is_read ? "text-sm" : "text-sm font-semibold"}>{alertMessage(locale, alert.type, alert.message)}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {format(new Date(alert.created_at), "d MMM yyyy, HH:mm", { locale: fr })}
+                    {format(new Date(alert.created_at), "d MMM yyyy, HH:mm", { locale: dateLocale })}
                   </p>
                 </div>
                 {!alert.is_read && (
@@ -98,12 +105,12 @@ export default function AlertsPage() {
                     type="button"
                     size="sm"
                     variant="ghost"
-                    aria-label="Marquer cette alerte comme lue"
+                    aria-label={t("Mark as read")}
                     disabled={markRead.isPending}
                     onClick={() => markRead.mutate(alert.id)}
                   >
                     <Check aria-hidden="true" />
-                    <span className="hidden sm:inline">Marquer comme lue</span>
+                    <span className="hidden sm:inline">{t("Mark as read")}</span>
                   </Button>
                 )}
               </div>
@@ -111,7 +118,7 @@ export default function AlertsPage() {
           })}
           {markRead.isError && (
             <p role="alert" className="px-5 pb-4 text-sm text-destructive">
-              Impossible de marquer l&apos;alerte comme lue.
+              {t("Couldn't mark the alert as read.")}
             </p>
           )}
         </CardContent>

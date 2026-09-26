@@ -1,6 +1,8 @@
 "use client"
 
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { useLocale, useT } from "@/components/locale-provider"
+import { localeTags } from "@/lib/i18n"
 import { motion, useReducedMotion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -17,8 +19,10 @@ export function DashboardCharts({
   categoryData: CategoryPoint[]
   currency: string
 }) {
+  const t = useT()
+  const locale = useLocale()
   const money = (amount: number) =>
-    new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount)
+    new Intl.NumberFormat(localeTags[locale], { style: "currency", currency, maximumFractionDigits: 0 }).format(amount)
   const sortedCategories = [...categoryData].sort((a, b) => b.value - a.value)
   const reduceMotion = useReducedMotion()
   const hasMonthlyActivity = monthlyData.some((point) => point.revenus > 0 || point.depenses > 0)
@@ -29,23 +33,23 @@ export function DashboardCharts({
         animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
       <Card className="h-full rounded-xl shadow-none">
         <CardContent className="p-5">
-          <h2 className="font-heading text-lg font-semibold">Évolution mensuelle</h2>
-          <p className="mb-6 text-sm text-muted-foreground">Revenus et dépenses sur 6 mois</p>
-          {hasMonthlyActivity ? <div role="img" aria-label="Graphique des revenus et dépenses des six derniers mois" className="h-64 w-full">
+          <h2 className="font-heading text-lg font-semibold">{t("Monthly trend")}</h2>
+          <p className="mb-6 text-sm text-muted-foreground">{t("Income and expenses over 6 months")}</p>
+          {hasMonthlyActivity ? <div role="img" aria-label={t("Income and expenses over 6 months")} className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} width={48} />
                 <Tooltip cursor={false} contentStyle={{ background: "var(--popover)", color: "var(--popover-foreground)", border: "1px solid var(--border)", borderRadius: 8 }} labelStyle={{ color: "var(--popover-foreground)" }} itemStyle={{ color: "var(--popover-foreground)" }} formatter={(value) => money(Number(value))} />
-                <Bar dataKey="revenus" name="Revenus" fill="var(--chart-1)" radius={[5, 5, 0, 0]} />
-                <Bar dataKey="depenses" name="Dépenses" fill="var(--chart-2)" radius={[5, 5, 0, 0]} />
+                <Bar dataKey="revenus" name={t("Income")} fill="var(--chart-1)" radius={[5, 5, 0, 0]} />
+                <Bar dataKey="depenses" name={t("Expenses")} fill="var(--chart-2)" radius={[5, 5, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </div> : <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">Ajoute une transaction pour afficher ton évolution.</div>}
+          </div> : <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">{t("Add a transaction to see your trend.")}</div>}
           {hasMonthlyActivity && <div className="mt-3 flex gap-5 text-xs text-muted-foreground">
-            <span><span className="mr-2 inline-block size-2 rounded-full bg-foreground" />Revenus</span>
-            <span><span className="mr-2 inline-block size-2 rounded-full bg-emerald-500" />Dépenses</span>
+            <span><span className="mr-2 inline-block size-2 rounded-full bg-foreground" />{t("Income")}</span>
+            <span><span className="mr-2 inline-block size-2 rounded-full bg-emerald-500" />{t("Expenses")}</span>
           </div>}
         </CardContent>
       </Card>
@@ -54,13 +58,13 @@ export function DashboardCharts({
         animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.08 }}>
       <Card className="h-full rounded-xl shadow-none">
         <CardContent className="p-5">
-          <h2 className="font-heading text-lg font-semibold">Par catégorie</h2>
-          <p className="mb-3 text-sm text-muted-foreground">Dépenses du mois</p>
+          <h2 className="font-heading text-lg font-semibold">{t("By category")}</h2>
+          <p className="mb-3 text-sm text-muted-foreground">{t("This month's expenses")}</p>
           {categoryData.length === 0 ? (
-            <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">Aucune dépense ce mois-ci.</div>
+            <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">{t("No expenses this month.")}</div>
           ) : (
             <>
-              <div role="img" aria-label="Répartition des dépenses par catégorie" className="h-48 w-full">
+              <div role="img" aria-label={t("By category")} className="h-48 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={sortedCategories} dataKey="value" nameKey="name" innerRadius={52} outerRadius={78} paddingAngle={3}>

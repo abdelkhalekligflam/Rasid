@@ -1,9 +1,13 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+import { categoryName } from "@/lib/i18n"
+
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { format } from "date-fns"
-import { fr } from "date-fns/locale"
+import { fr, enUS, arMA } from "date-fns/locale"
+
 import { createClient } from "@/lib/supabase/client"
 import { AddTransactionDialog } from "@/components/transactions/add-transaction-dialog"
 import { Card, CardContent } from "@/components/ui/card"
@@ -13,6 +17,9 @@ import { useCurrency } from "@/hooks/use-currency"
 import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 export default function TransactionsPage() {
+  const t = useT()
+  const locale = useLocale()
+  const dateLocale = locale === "ar" ? arMA : locale === "fr" ? fr : enUS
   const supabase = createClient()
   const money = useCurrency()
   const [search, setSearch] = useState("")
@@ -44,41 +51,41 @@ export default function TransactionsPage() {
     (!search || `${tx.categories?.name || ""} ${tx.description || ""}`.toLowerCase().includes(search.toLowerCase()))
   )
   const categories = [...new Map(
-    transactions?.filter((tx) => tx.category_id).map((tx) => [tx.category_id, tx.categories?.name || "Sans catégorie"]) || []
+    transactions?.filter((tx) => tx.category_id).map((tx) => [tx.category_id, tx.categories?.name ? categoryName(locale, tx.categories.name) : t("Uncategorized")]) || []
   )]
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-semibold">Transactions</h1>
+          <h1 className="text-2xl font-heading font-semibold">{t("Transactions")}</h1>
           <p className="text-muted-foreground text-sm">
-            Historique de tes revenus et dépenses
+            {t('Your income and expense history')}
           </p>
         </div>
         <AddTransactionDialog />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Input aria-label="Rechercher les transactions" placeholder="Rechercher..." value={search} onChange={(event) => setSearch(event.target.value)} />
-        <select aria-label="Filtrer par type" className="h-9 rounded-md border bg-background px-3 text-sm" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-          <option value="all">Tous les types</option><option value="expense">Dépenses</option><option value="income">Revenus</option>
+        <Input aria-label={t("Search...")} placeholder={t('Search...')} value={search} onChange={(event) => setSearch(event.target.value)} />
+        <select aria-label={t("All types")} className="h-9 rounded-md border bg-background px-3 text-sm" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+          <option value="all">{t("All types")}</option><option value="expense">{t("Expenses")}</option><option value="income">{t("Income")}</option>
         </select>
-        <select aria-label="Filtrer par catégorie" className="h-9 rounded-md border bg-background px-3 text-sm"
+        <select aria-label={t("All categories")} className="h-9 rounded-md border bg-background px-3 text-sm"
           value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-          <option value="all">Toutes les catégories</option>
+          <option value="all">{t("All categories")}</option>
           {categories.map(([id, name]) => <option key={id} value={id || ""}>{name}</option>)}
         </select>
-        <Input aria-label="Filtrer par mois" type="month" value={monthFilter} onChange={(event) => setMonthFilter(event.target.value)} />
+        <Input aria-label={t("This month")} type="month" value={monthFilter} onChange={(event) => setMonthFilter(event.target.value)} />
       </div>
       <Card>
         <CardContent className="p-0">
           {isLoading && <div className="p-4"><PageSkeleton /></div>}
 
-          {loadError && <p role="alert" className="p-6 text-sm text-destructive">Impossible de charger les transactions.</p>}
+          {loadError && <p role="alert" className="p-6 text-sm text-destructive">{t("Couldn't load transactions.")}</p>}
           {!isLoading && !loadError && filtered?.length === 0 && (
             <p className="p-6 text-sm text-muted-foreground">
-              Aucune transaction trouvée.
+              {t('No transactions found.')}
             </p>
           )}
 
@@ -89,12 +96,12 @@ export default function TransactionsPage() {
             >
               <div>
                 <p className="font-medium">
-                  {tx.categories?.name || "Sans catégorie"}
+                  {tx.categories?.name ? categoryName(locale, tx.categories.name) : t("Uncategorized")}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {tx.description || "—"} ·{" "}
                   {format(new Date(tx.transaction_date), "d MMM yyyy", {
-                    locale: fr,
+                    locale: dateLocale,
                   })}
                 </p>
               </div>

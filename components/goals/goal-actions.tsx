@@ -1,5 +1,7 @@
 "use client"
 
+import { useT } from "@/components/locale-provider"
+
 import { useState } from "react"
 import { ConfirmAction } from "@/components/shared/confirm-action"
 import { notify } from "@/components/shared/toast"
@@ -14,6 +16,7 @@ import { Label } from "@/components/ui/label"
 type Goal = { id: string; name: string; target_amount: number; target_date: string | null }
 
 export function GoalActions({ goal }: { goal: Goal }) {
+  const t = useT()
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
@@ -42,34 +45,34 @@ export function GoalActions({ goal }: { goal: Goal }) {
   })
   return (
     <>
-      <Button size="icon-sm" variant="ghost" aria-label="Modifier l'objectif" onClick={() => setOpen(true)}>
+      <Button size="icon-sm" variant="ghost" aria-label={t("Edit goal")} onClick={() => setOpen(true)}>
         <Pencil aria-hidden="true" />
       </Button>
-      <Button size="icon-sm" variant="ghost" aria-label="Supprimer l'objectif" disabled={remove.isPending}
+      <Button size="icon-sm" variant="ghost" aria-label={t("Delete goal")} disabled={remove.isPending}
         onClick={() => setConfirmOpen(true)}>
         <Trash2 aria-hidden="true" />
       </Button>
-      {remove.isError && <p role="alert" className="text-xs text-destructive">Suppression impossible.</p>}
-      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title="Supprimer l’objectif ?" description="L’objectif et sa progression seront supprimés définitivement." action="Supprimer" destructive pending={remove.isPending} onConfirm={() => remove.mutate()} />
+      {remove.isError && <p role="alert" className="text-xs text-destructive">{t("Couldn't delete the goal.")}</p>}
+      <ConfirmAction open={confirmOpen} onOpenChange={setConfirmOpen} title={t("Delete this goal?")} description={t("The goal and its progress will be permanently deleted.")} action={t("Delete")} destructive pending={remove.isPending} onConfirm={() => remove.mutate()} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Modifier l&apos;objectif</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('Edit goal')}</DialogTitle></DialogHeader>
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); update.mutate() }}>
             <div className="space-y-2">
-              <Label htmlFor={`goal-name-${goal.id}`}>Nom</Label>
+              <Label htmlFor={`goal-name-${goal.id}`}>{t('Name')}</Label>
               <Input id={`goal-name-${goal.id}`} value={name} required onChange={(event) => setName(event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`goal-target-${goal.id}`}>Montant cible</Label>
+              <Label htmlFor={`goal-target-${goal.id}`}>{t('Target amount')}</Label>
               <Input id={`goal-target-${goal.id}`} type="number" step="0.01" min="0.01" required
                 value={target} onChange={(event) => setTarget(event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`goal-date-${goal.id}`}>Date cible</Label>
+              <Label htmlFor={`goal-date-${goal.id}`}>{t('Target date')}</Label>
               <Input id={`goal-date-${goal.id}`} type="date" value={date} onChange={(event) => setDate(event.target.value)} />
             </div>
             {update.error && <p role="alert" className="text-sm text-destructive">{update.error.message}</p>}
-            <Button type="submit" className="w-full" disabled={update.isPending}>Enregistrer</Button>
+            <Button type="submit" className="w-full" disabled={update.isPending}>{t('Save')}</Button>
           </form>
         </DialogContent>
       </Dialog>

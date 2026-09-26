@@ -1,5 +1,8 @@
 "use client"
 
+import { useT, useLocale } from "@/components/locale-provider"
+import { categoryName } from "@/lib/i18n"
+
 import { useState } from "react"
 import { ConfirmAction } from "@/components/shared/confirm-action"
 import { notify } from "@/components/shared/toast"
@@ -22,6 +25,8 @@ type Category = {
 }
 
 export default function CategoriesPage() {
+  const t = useT()
+  const locale = useLocale()
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
@@ -70,8 +75,8 @@ export default function CategoriesPage() {
         .eq("id", category.id).eq("is_default", false)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmCategory(null); notify("Catégorie supprimée.") },
-    onError: () => { notify("Impossible de supprimer cette catégorie.", true); setActionError("Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des transactions ou budgets.") },
+    onSuccess: () => { refresh(); setConfirmCategory(null); notify(t("Category deleted.")) },
+    onError: () => { notify(t("Couldn't delete this category."), true); setActionError("Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des transactions ou budgets.") },
   })
   const startCreate = () => {
     setEditing(null); setName(""); setType("expense"); setColor("#10B981"); setActionError(""); setOpen(true)
@@ -85,30 +90,30 @@ export default function CategoriesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-semibold">Catégories</h1>
-          <p className="text-sm text-muted-foreground">Organise tes revenus et dépenses.</p>
+          <h1 className="text-2xl font-heading font-semibold">{t("Categories")}</h1>
+          <p className="text-sm text-muted-foreground">{t("Organize your income and expenses")}</p>
         </div>
-        <Button onClick={startCreate}><Plus aria-hidden="true" /> Nouvelle catégorie</Button>
+        <Button onClick={startCreate}><Plus aria-hidden="true" /> {t('New category')}</Button>
       </div>
       {actionError && <p role="alert" className="text-sm text-destructive">{actionError}</p>}
       <Card><CardContent className="p-0">
         {isLoading && <div className="p-4"><PageSkeleton /></div>}
-        {error && <p role="alert" className="p-6 text-sm text-destructive">Impossible de charger les catégories.</p>}
+        {error && <p role="alert" className="p-6 text-sm text-destructive">{t("Couldn't load categories.")}</p>}
         {categories?.map((category) => (
           <div key={category.id} className="flex items-center gap-3 border-b px-5 py-4 last:border-0">
             <span className="size-3 rounded-full" style={{ backgroundColor: category.color || "#94A3B8" }} />
             <div className="min-w-0 flex-1">
-              <p className="font-medium">{category.name}</p>
+              <p className="font-medium">{categoryName(locale, category.name)}</p>
               <p className="text-xs text-muted-foreground">
-                {category.type === "income" ? "Revenu" : "Dépense"} · {category.is_default ? "Par défaut" : "Personnalisée"}
+                {category.type === "income" ? t("Income item") : t("Expense")} · {category.is_default ? t("Default") : t("Custom")}
               </p>
             </div>
             {!category.is_default && (
               <>
-                <Button size="icon-sm" variant="ghost" aria-label={`Modifier ${category.name}`} onClick={() => startEdit(category)}>
+                <Button size="icon-sm" variant="ghost" aria-label={`Modifier ${categoryName(locale, category.name)}`} onClick={() => startEdit(category)}>
                   <Pencil aria-hidden="true" />
                 </Button>
-                <Button size="icon-sm" variant="ghost" aria-label={`Supprimer ${category.name}`}
+                <Button size="icon-sm" variant="ghost" aria-label={`Supprimer ${categoryName(locale, category.name)}`}
                   disabled={remove.isPending}
                   onClick={() => {
                     setActionError("")
@@ -121,29 +126,29 @@ export default function CategoriesPage() {
           </div>
         ))}
       </CardContent></Card>
-      <ConfirmAction open={!!confirmCategory} onOpenChange={(value) => { if (!value) setConfirmCategory(null) }} title="Supprimer la catégorie ?" description={`La catégorie « ${confirmCategory?.name || ""} » sera supprimée si elle n’est utilisée par aucune transaction ou budget.`} action="Supprimer" destructive pending={remove.isPending} onConfirm={() => { if (confirmCategory) remove.mutate(confirmCategory) }} />
+      <ConfirmAction open={!!confirmCategory} onOpenChange={(value) => { if (!value) setConfirmCategory(null) }} title={t("Delete this category?")} description={t("This category can be deleted if no transactions or budgets use it.")} action={t("Delete")} destructive pending={remove.isPending} onConfirm={() => { if (confirmCategory) remove.mutate(confirmCategory) }} />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Modifier la catégorie" : "Nouvelle catégorie"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editing ? t("Edit category") : t("New category")}</DialogTitle></DialogHeader>
           <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); save.mutate() }}>
             <div className="space-y-2">
-              <Label htmlFor="category-name">Nom</Label>
+              <Label htmlFor="category-name">{t("Name")}</Label>
               <Input id="category-name" required maxLength={60} value={name} onChange={(event) => setName(event.target.value)} />
             </div>
             {!editing && <div className="space-y-2">
-              <Label htmlFor="category-type">Type</Label>
+              <Label htmlFor="category-type">{t("Type")}</Label>
               <select id="category-type" className="w-full rounded-md border bg-background p-2 text-sm" value={type}
                 onChange={(event) => setType(event.target.value as "income" | "expense")}>
-                <option value="expense">Dépense</option><option value="income">Revenu</option>
+                <option value="expense">{t("Expense")}</option><option value="income">{t("Income item")}</option>
               </select>
             </div>}
             <div className="space-y-2">
-              <Label htmlFor="category-color">Couleur</Label>
+              <Label htmlFor="category-color">{t("Color")}</Label>
               <Input id="category-color" type="color" value={color} onChange={(event) => setColor(event.target.value)} />
             </div>
             {save.error && <p role="alert" className="text-sm text-destructive">{save.error.message}</p>}
             <Button type="submit" className="w-full" disabled={save.isPending}>
-              {save.isPending ? "Enregistrement..." : "Enregistrer"}
+              {save.isPending ? t("Saving...") : t("Save")}
             </Button>
           </form>
         </DialogContent>

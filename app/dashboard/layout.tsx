@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { LanguageSelect } from "@/components/locale-provider"
+import { getT } from "@/lib/i18n-server"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 
 export default async function DashboardLayout({
@@ -16,6 +18,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const t = await getT()
   const supabase = await createClient()
   const {
     data: { user },
@@ -52,6 +55,7 @@ export default async function DashboardLayout({
         <header className="flex items-center justify-between h-16 px-5 sm:px-8 border-b bg-background sticky top-0 z-10">
           <SidebarTrigger />
           <div className="flex items-center gap-2">
+          <LanguageSelect />
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -67,7 +71,7 @@ export default async function DashboardLayout({
               <DropdownMenuItem asChild>
                 <form action={signOut} className="w-full">
                   <button type="submit" className="w-full text-left">
-                    Se déconnecter
+                    {t("Sign out")}
                   </button>
                 </form>
               </DropdownMenuItem>

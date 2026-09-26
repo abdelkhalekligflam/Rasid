@@ -90,3 +90,13 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+html[lang="ar"] body {
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  line-height: 1.6;
+}
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3 {
+  letter-spacing: normal;
+}
