@@ -55,12 +55,20 @@ export default function BudgetsPage() {
   const { data: transactions } = useQuery({
     queryKey: ["transactions-for-budgets"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("category_id, amount, transaction_date")
-        .eq("type", "expense")
-      if (error) throw error
-      return data as Transaction[]
+      const pageSize = 1000
+      const all: Transaction[] = []
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase
+          .from("transactions")
+          .select("category_id, amount, transaction_date")
+          .eq("type", "expense")
+          .order("transaction_date", { ascending: false })
+          .range(offset, offset + pageSize - 1)
+        if (error) throw error
+        all.push(...(data as Transaction[]))
+        if (!data || data.length < pageSize) break
+      }
+      return all
     },
   })
 
