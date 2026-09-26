@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { loginSchema, type LoginInput } from "@/lib/validations/auth"
@@ -51,8 +52,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
+      <div className="absolute -top-32 right-0 size-96 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+      <div className="relative w-full max-w-md">
+      <Link href="/" className="mb-7 block text-center font-heading text-3xl font-bold text-primary">rasid<span className="text-foreground">.</span></Link>
+      <Card className="w-full rounded-2xl border-border/70 shadow-xl shadow-primary/5">
         <CardHeader>
           <CardTitle className="text-2xl font-heading">
             Connexion à Rasid
@@ -103,13 +107,14 @@ export default function LoginPage() {
 
             <p className="text-sm text-center text-muted-foreground">
               Pas encore de compte ?{" "}
-              <a href="/signup" className="text-primary font-medium hover:underline">
+              <Link href="/signup" className="text-primary font-medium hover:underline">
                 Créer un compte
-              </a>
+              </Link>
             </p>
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

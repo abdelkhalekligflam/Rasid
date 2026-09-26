@@ -9,6 +9,8 @@ import { AddGoalDialog } from "@/components/goals/add-goal-dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { GoalActions } from "@/components/goals/goal-actions"
+import { useCurrency } from "@/hooks/use-currency"
 import {
   Dialog,
   DialogContent,
@@ -36,14 +38,15 @@ function ContributeDialog({ goal }: { goal: Goal }) {
       const value = parseFloat(amount)
       if (isNaN(value) || value <= 0) throw new Error("Montant invalide")
 
-      const { error } = await supabase
-        .from("savings_goals")
-        .update({ current_amount: goal.current_amount + value })
-        .eq("id", goal.id)
+      const { error } = await supabase.rpc("contribute_to_goal", {
+        goal_id: goal.id, amount_to_add: value,
+      })
       if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals"] })
+      queryClient.invalidateQueries({ queryKey: ["unread-alert-count"] })
+      queryClient.invalidateQueries({ queryKey: ["alerts"] })
       setAmount("")
       setOpen(false)
     },
@@ -65,11 +68,13 @@ function ContributeDialog({ goal }: { goal: Goal }) {
         <div className="space-y-4">
           <Input
             type="number"
+            min="0.01"
             step="0.01"
             placeholder="Montant à ajouter"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
+          {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
           <Button
             className="w-full"
             disabled={mutation.isPending}
@@ -85,8 +90,9 @@ function ContributeDialog({ goal }: { goal: Goal }) {
 
 export default function GoalsPage() {
   const supabase = createClient()
+  const money = useCurrency()
 
-  const { data: goals, isLoading } = useQuery({
+  const { data: goals, isLoading, error: loadError } = useQuery({
     queryKey: ["goals"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -115,6 +121,7 @@ export default function GoalsPage() {
       {isLoading && (
         <p className="text-sm text-muted-foreground">Chargement...</p>
       )}
+      {loadError && <p role="alert" className="text-sm text-destructive">Impossible de charger les objectifs.</p>}
 
       {!isLoading && goals?.length === 0 && (
         <p className="text-sm text-muted-foreground">
@@ -133,8 +140,9 @@ export default function GoalsPage() {
           return (
             <Card key={goal.id}>
               <CardContent className="p-6 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <p className="font-medium">{goal.name}</p>
+                  <div className="flex items-center gap-2">
                   {goal.target_date && (
                     <span className="text-xs text-muted-foreground">
                       Échéance :{" "}
@@ -143,18 +151,16 @@ export default function GoalsPage() {
                       })}
                     </span>
                   )}
+                  <GoalActions goal={goal} />
+                  </div>
                 </div>
 
                 <div className="flex items-baseline justify-between">
                   <p className="text-2xl font-heading font-semibold tabular-nums">
-                    {goal.current_amount.toLocaleString("fr-FR", {
-                      minimumFractionDigits: 2,
-                    })}
+                    {money(Number(goal.current_amount))}
                   </p>
                   <p className="text-sm text-muted-foreground tabular-nums">
-                    / {goal.target_amount.toLocaleString("fr-FR", {
-                      minimumFractionDigits: 2,
-                    })}
+                    / {money(Number(goal.target_amount))}
                   </p>
                 </div>
 
