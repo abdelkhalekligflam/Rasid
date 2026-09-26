@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 export default function SettingsPage() {
   const supabase = createClient()
@@ -65,7 +66,7 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-heading font-semibold">Paramètres</h1>
         <p className="text-sm text-muted-foreground">Personnalise ton compte Rasid.</p>
       </div>
-      {isLoading && <p className="text-sm text-muted-foreground">Chargement...</p>}
+      {isLoading && <PageSkeleton rows={2} />}
       {error && <p role="alert" className="text-sm text-destructive">Impossible de charger ton profil.</p>}
       {profile && <>
         <Card className="rounded-2xl"><CardContent className="space-y-5 p-6">

@@ -1,6 +1,7 @@
 "use client"
 
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { motion, useReducedMotion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 
 type MonthlyPoint = { month: string; revenus: number; depenses: number }
@@ -19,10 +20,13 @@ export function DashboardCharts({
   const money = (amount: number) =>
     new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount)
   const sortedCategories = [...categoryData].sort((a, b) => b.value - a.value)
+  const reduceMotion = useReducedMotion()
 
   return (
     <div className="grid gap-4 xl:grid-cols-5">
-      <Card className="rounded-2xl shadow-sm xl:col-span-3">
+      <motion.div className="xl:col-span-3" initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+      <Card className="h-full rounded-2xl shadow-sm">
         <CardContent className="p-5">
           <h2 className="font-heading text-lg font-semibold">Évolution mensuelle</h2>
           <p className="mb-6 text-sm text-muted-foreground">Revenus et dépenses sur 6 mois</p>
@@ -44,7 +48,10 @@ export function DashboardCharts({
           </div>
         </CardContent>
       </Card>
-      <Card className="rounded-2xl shadow-sm xl:col-span-2">
+      </motion.div>
+      <motion.div className="xl:col-span-2" initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.08 }}>
+      <Card className="h-full rounded-2xl shadow-sm">
         <CardContent className="p-5">
           <h2 className="font-heading text-lg font-semibold">Par catégorie</h2>
           <p className="mb-3 text-sm text-muted-foreground">Dépenses du mois</p>
@@ -77,6 +84,7 @@ export function DashboardCharts({
           )}
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   )
 }

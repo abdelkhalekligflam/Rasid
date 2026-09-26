@@ -7,6 +7,7 @@ import { AddBudgetDialog } from "@/components/budgets/add-budget-dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import { BudgetActions } from "@/components/budgets/budget-actions"
 import { useCurrency } from "@/hooks/use-currency"
+import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 type Budget = {
   id: string
@@ -112,9 +113,7 @@ export default function BudgetsPage() {
         <AddBudgetDialog />
       </div>
 
-      {isLoading && (
-        <p className="text-sm text-muted-foreground">Chargement...</p>
-      )}
+      {isLoading && <PageSkeleton />}
 
       {!isLoading && budgets?.length === 0 && (
         <p className="text-sm text-muted-foreground">

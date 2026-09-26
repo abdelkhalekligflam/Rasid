@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 type Category = {
   id: string
@@ -88,7 +89,7 @@ export default function CategoriesPage() {
       </div>
       {actionError && <p role="alert" className="text-sm text-destructive">{actionError}</p>}
       <Card><CardContent className="p-0">
-        {isLoading && <p className="p-6 text-sm text-muted-foreground">Chargement...</p>}
+        {isLoading && <div className="p-4"><PageSkeleton /></div>}
         {error && <p role="alert" className="p-6 text-sm text-destructive">Impossible de charger les catégories.</p>}
         {categories?.map((category) => (
           <div key={category.id} className="flex items-center gap-3 border-b px-5 py-4 last:border-0">

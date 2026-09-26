@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { GoalActions } from "@/components/goals/goal-actions"
 import { useCurrency } from "@/hooks/use-currency"
+import { PageSkeleton } from "@/components/shared/page-skeleton"
 import {
   Dialog,
   DialogContent,
@@ -118,9 +119,7 @@ export default function GoalsPage() {
         <AddGoalDialog />
       </div>
 
-      {isLoading && (
-        <p className="text-sm text-muted-foreground">Chargement...</p>
-      )}
+      {isLoading && <PageSkeleton />}
       {loadError && <p role="alert" className="text-sm text-destructive">Impossible de charger les objectifs.</p>}
 
       {!isLoading && goals?.length === 0 && (
