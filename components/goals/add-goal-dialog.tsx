@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { z } from "zod"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { CalendarIcon, Plus } from "lucide-react"
@@ -32,14 +32,14 @@ export function AddGoalDialog() {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     reset,
     formState: { errors },
   } = useForm<z.input<typeof goalSchema>, unknown, GoalInput>({
     resolver: zodResolver(goalSchema),
   })
 
-  const selectedDate = watch("targetDate")
+  const selectedDate = useWatch({ control, name: "targetDate" })
 
   const mutation = useMutation({
     mutationFn: async (values: GoalInput) => {
@@ -139,6 +139,7 @@ export function AddGoalDialog() {
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? "Création..." : "Créer l'objectif"}
           </Button>
+          {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
         </form>
       </DialogContent>
     </Dialog>

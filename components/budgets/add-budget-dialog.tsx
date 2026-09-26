@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
+import { format } from "date-fns"
 import { createClient } from "@/lib/supabase/client"
 import { budgetSchema, type BudgetInput } from "@/lib/validations/budget"
 import { Button } from "@/components/ui/button"
@@ -48,7 +49,7 @@ export function AddBudgetDialog() {
     defaultValues: { recurrence: "monthly" },
   })
 
-  const { data: categories } = useQuery({
+  const { data: categories, error: categoryError } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -71,7 +72,7 @@ export function AddBudgetDialog() {
         category_id: values.categoryId,
         amount_limit: values.amountLimit,
         recurrence: values.recurrence,
-        start_date: new Date().toISOString().split("T")[0],
+        start_date: format(new Date(), "yyyy-MM-dd"),
       })
       if (error) throw error
     },
@@ -118,6 +119,7 @@ export function AddBudgetDialog() {
                 {errors.categoryId.message}
               </p>
             )}
+            {categoryError && <p role="alert" className="text-sm text-destructive">Impossible de charger les catégories.</p>}
           </div>
 
           <div className="space-y-2">
@@ -158,6 +160,7 @@ export function AddBudgetDialog() {
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? "Création..." : "Créer le budget"}
           </Button>
+          {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
         </form>
       </DialogContent>
     </Dialog>

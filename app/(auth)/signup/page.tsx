@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { signupSchema, type SignupInput } from "@/lib/validations/auth"
@@ -22,6 +23,7 @@ const CURRENCIES = ["MAD", "EUR", "USD", "GBP"]
 export default function SignupPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const {
@@ -36,10 +38,11 @@ export default function SignupPage() {
   async function onSubmit(data: SignupInput) {
     setLoading(true)
     setError(null)
+    setSuccess(null)
 
     const supabase = createClient()
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -56,13 +59,22 @@ export default function SignupPage() {
       return
     }
 
+    if (!signUpData.session) {
+      setSuccess("Vérifie ta boîte mail pour confirmer ton compte, puis connecte-toi.")
+      setLoading(false)
+      return
+    }
+
     router.push("/dashboard")
     router.refresh()
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
+      <div className="absolute -top-32 left-0 size-96 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+      <div className="relative w-full max-w-md">
+      <Link href="/" className="mb-7 block text-center font-heading text-3xl font-bold text-primary">rasid<span className="text-foreground">.</span></Link>
+      <Card className="w-full rounded-2xl border-border/70 shadow-xl shadow-primary/5">
         <CardHeader>
           <CardTitle className="text-2xl font-heading">
             Créer ton compte Rasid
@@ -138,6 +150,9 @@ export default function SignupPage() {
             {error && (
               <p className="text-sm text-destructive text-center">{error}</p>
             )}
+            {success && (
+              <p role="status" className="text-sm text-primary text-center">{success}</p>
+            )}
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Création..." : "Créer mon compte"}
@@ -145,13 +160,14 @@ export default function SignupPage() {
 
             <p className="text-sm text-center text-muted-foreground">
               Déjà un compte ?{" "}
-              <a href="/login" className="text-primary font-medium hover:underline">
+              <Link href="/login" className="text-primary font-medium hover:underline">
                 Se connecter
-              </a>
+              </Link>
             </p>
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

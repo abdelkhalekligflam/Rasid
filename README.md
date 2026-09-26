@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rasid
 
-## Getting Started
+Application personnelle de suivi de finances avec Next.js 16, TypeScript, Supabase et Tailwind CSS.
 
-First, run the development server:
+## Fonctions
+
+- Authentification et devise fixe choisie à l'inscription (MAD, EUR, USD, GBP)
+- Dashboard : solde, revenus et dépenses du mois, épargne, graphiques et transactions récentes
+- Transactions : ajout, modification, suppression et filtres
+- Budgets récurrents par catégorie, avec suivi de la période active
+- Objectifs d'épargne et contributions atomiques
+- Alertes de seuil, dépassement et objectif atteint
+- Catégories par défaut et personnalisées
+- Profil et thème clair, sombre ou système
+
+## Démarrage
+
+Prérequis : Node.js 20.9+ et un projet Supabase configuré.
 
 ```bash
+npm ci
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Renseigner dans `.env.local` l'URL et la clé **publishable** du projet Supabase. Ne jamais utiliser une clé `service_role` ou une clé secrète avec `NEXT_PUBLIC_`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Ouvrir [http://localhost:3000](http://localhost:3000). Pour vérifier le code :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
 
-## Learn More
+## Base de données
 
-To learn more about Next.js, take a look at the following resources:
+Le projet Supabase existant de Rasid possède déjà les tables et les migrations listées dans `supabase/migrations/`. Les versions des fichiers correspondent à l'historique des migrations du projet. Ne pas les rejouer manuellement sur ce projet.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Pour un **nouveau** projet Supabase, exécuter `supabase/bootstrap.sql` une fois dans le SQL Editor, puis appliquer les migrations numérotées dans l'ordre. Activer la confirmation d'email et configurer l'URL du site dans Supabase Auth selon l'environnement utilisé.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Toutes les tables exposées ont RLS activé. Les politiques limitent les lignes à l'utilisateur connecté. Les fonctions de trigger ne sont pas directement exécutables par les rôles web. La devise du profil est immuable après l'inscription.
 
-## Deploy on Vercel
+## Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/` : pages et layouts App Router
+- `components/` : interface, graphiques et formulaires
+- `lib/supabase/` : clients navigateur, serveur et rafraîchissement de session
+- `lib/validations/` : schémas Zod
+- `supabase/` : bootstrap et migrations SQL
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Les montants affichés utilisent la devise du profil sans conversion de taux.

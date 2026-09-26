@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { CalendarIcon, Plus } from "lucide-react"
@@ -49,17 +50,17 @@ export function AddTransactionDialog() {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     reset,
     formState: { errors },
-  } = useForm<TransactionInput>({
+  } = useForm<z.input<typeof transactionSchema>, unknown, TransactionInput>({
     resolver: zodResolver(transactionSchema),
     defaultValues: { type: "expense", transactionDate: new Date() },
   })
 
-  const selectedDate = watch("transactionDate")
+  const selectedDate = useWatch({ control, name: "transactionDate" })
 
-  const { data: categories } = useQuery({
+  const { data: categories, error: categoryError } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -90,6 +91,9 @@ export function AddTransactionDialog() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
+      queryClient.invalidateQueries({ queryKey: ["transactions-for-budgets"] })
+      queryClient.invalidateQueries({ queryKey: ["unread-alert-count"] })
+      queryClient.invalidateQueries({ queryKey: ["alerts"] })
       reset()
       setOpen(false)
     },
@@ -158,6 +162,7 @@ export function AddTransactionDialog() {
                 {errors.categoryId.message}
               </p>
             )}
+            {categoryError && <p role="alert" className="text-sm text-destructive">Impossible de charger les catégories.</p>}
           </div>
 
           <div className="space-y-2">
@@ -214,6 +219,7 @@ export function AddTransactionDialog() {
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? "Ajout..." : "Ajouter"}
           </Button>
+          {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
         </form>
       </DialogContent>
     </Dialog>
