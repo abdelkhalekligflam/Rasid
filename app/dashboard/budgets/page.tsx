@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
+import { addMonths, addWeeks, addYears, differenceInCalendarDays, differenceInCalendarMonths, differenceInCalendarYears, format, parseISO } from "date-fns"
 import { createClient } from "@/lib/supabase/client"
 import { AddBudgetDialog } from "@/components/budgets/add-budget-dialog"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,13 +9,32 @@ import { Card, CardContent } from "@/components/ui/card"
 type Budget = {
   id: string
   amount_limit: number
-  recurrence: string
+  recurrence: "weekly" | "monthly" | "yearly"
+  start_date: string
   categories: { name: string } | null
 }
 
 type Transaction = {
   category_id: string
   amount: number
+  transaction_date: string
+}
+
+function getBudgetPeriod(budget: Budget, today: Date) {
+  const anchor = parseISO(budget.start_date)
+  const addPeriod = budget.recurrence === "weekly" ? addWeeks : budget.recurrence === "yearly" ? addYears : addMonths
+  let count = budget.recurrence === "weekly"
+    ? Math.floor(differenceInCalendarDays(today, anchor) / 7)
+    : budget.recurrence === "yearly"
+      ? differenceInCalendarYears(today, anchor)
+      : differenceInCalendarMonths(today, anchor)
+  count = Math.max(0, count)
+  while (count > 0 && addPeriod(anchor, count) > today) count--
+  while (addPeriod(anchor, count + 1) <= today) count++
+  return {
+    start: format(addPeriod(anchor, count), "yyyy-MM-dd"),
+    end: format(addPeriod(anchor, count + 1), "yyyy-MM-dd"),
+  }
 }
 
 export default function BudgetsPage() {
@@ -25,7 +45,7 @@ export default function BudgetsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("budgets")
-        .select("id, amount_limit, recurrence, category_id, categories(name)")
+        .select("id, amount_limit, recurrence, start_date, category_id, categories(name)")
         .eq("is_active", true)
       if (error) throw error
       return data as unknown as (Budget & { category_id: string })[]
@@ -37,19 +57,22 @@ export default function BudgetsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("transactions")
-        .select("category_id, amount")
+        .select("category_id, amount, transaction_date")
         .eq("type", "expense")
       if (error) throw error
       return data as Transaction[]
     },
   })
 
-  function getSpent(categoryId: string) {
-    return (
-      transactions
-        ?.filter((tx) => tx.category_id === categoryId)
-        .reduce((sum, tx) => sum + Number(tx.amount), 0) || 0
-    )
+  function getSpent(budget: Budget & { category_id: string }) {
+    const { start, end } = getBudgetPeriod(budget, new Date())
+    return transactions
+      ?.filter((tx) =>
+        tx.category_id === budget.category_id &&
+        tx.transaction_date >= start &&
+        tx.transaction_date < end
+      )
+      .reduce((sum, tx) => sum + Number(tx.amount), 0) ?? 0
   }
 
   const recurrenceLabel: Record<string, string> = {
@@ -82,7 +105,7 @@ export default function BudgetsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {budgets?.map((budget) => {
-          const spent = getSpent(budget.category_id)
+          const spent = getSpent(budget)
           const percent = Math.min(
             Math.round((spent / budget.amount_limit) * 100),
             999
