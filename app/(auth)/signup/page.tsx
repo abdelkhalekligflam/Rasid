@@ -22,6 +22,7 @@ const CURRENCIES = ["MAD", "EUR", "USD", "GBP"]
 export default function SignupPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const {
@@ -36,10 +37,11 @@ export default function SignupPage() {
   async function onSubmit(data: SignupInput) {
     setLoading(true)
     setError(null)
+    setSuccess(null)
 
     const supabase = createClient()
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -52,6 +54,12 @@ export default function SignupPage() {
 
     if (signUpError) {
       setError(signUpError.message)
+      setLoading(false)
+      return
+    }
+
+    if (!signUpData.session) {
+      setSuccess("Vérifie ta boîte mail pour confirmer ton compte, puis connecte-toi.")
       setLoading(false)
       return
     }
@@ -137,6 +145,9 @@ export default function SignupPage() {
 
             {error && (
               <p className="text-sm text-destructive text-center">{error}</p>
+            )}
+            {success && (
+              <p role="status" className="text-sm text-primary text-center">{success}</p>
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
