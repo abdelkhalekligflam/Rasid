@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
 import {
   LayoutDashboard,
   ArrowLeftRight,
@@ -32,6 +34,18 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const supabase = createClient()
+  const { data: unreadCount } = useQuery({
+    queryKey: ["unread-alert-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("alerts")
+        .select("id", { count: "exact", head: true })
+        .eq("is_read", false)
+      if (error) throw error
+      return count ?? 0
+    },
+  })
 
   return (
     <Sidebar>
@@ -50,6 +64,11 @@ export function AppSidebar() {
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
+                      {item.url === "/dashboard/alerts" && !!unreadCount && (
+                        <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground" aria-label={`${unreadCount} alertes non lues`}>
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
