@@ -90,6 +90,9 @@ export function AddTransactionDialog() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
+      queryClient.invalidateQueries({ queryKey: ["transactions-for-budgets"] })
+      queryClient.invalidateQueries({ queryKey: ["unread-alert-count"] })
+      queryClient.invalidateQueries({ queryKey: ["alerts"] })
       reset()
       setOpen(false)
     },
