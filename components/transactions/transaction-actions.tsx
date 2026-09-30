@@ -70,8 +70,8 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
       const { error } = await supabase.from("transactions").delete().eq("id", transaction.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmOpen(false); notify("Transaction supprimée.") },
-    onError: () => notify("Impossible de supprimer la transaction.", true),
+    onSuccess: () => { refresh(); setConfirmOpen(false); notify(t('Deleted transaction.')) },
+    onError: () => notify(t("Couldn't delete the transaction."), true),
   })
 
   return (

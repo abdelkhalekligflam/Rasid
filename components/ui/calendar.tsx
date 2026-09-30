@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import { useLocale } from "@/components/locale-provider"
+import { enUS, fr, arMA } from "date-fns/locale"
 import { cn } from "cn"
 import {
   DayPicker,
@@ -25,6 +27,8 @@ function Calendar({
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }) {
+  const appLocale = useLocale()
+  const calendarLocale = locale ?? (appLocale === "ar" ? arMA : appLocale === "fr" ? fr : enUS)
   const defaultClassNames = getDefaultClassNames()
 
   return (
@@ -37,10 +41,11 @@ function Calendar({
         className
       )}
       captionLayout={captionLayout}
-      locale={locale}
+      locale={calendarLocale}
+      dir={appLocale === "ar" ? "rtl" : "ltr"}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString(locale?.code, { month: "short" }),
+          date.toLocaleString(calendarLocale.code, { month: "short" }),
         ...formatters,
       }}
       classNames={{
@@ -162,7 +167,7 @@ function Calendar({
           )
         },
         DayButton: ({ ...props }) => (
-          <CalendarDayButton locale={locale} {...props} />
+          <CalendarDayButton locale={calendarLocale} {...props} />
         ),
         WeekNumber: ({ children, ...props }) => {
           return (

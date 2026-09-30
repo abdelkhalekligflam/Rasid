@@ -70,7 +70,7 @@ export default async function DashboardLayout({
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <form action={signOut} className="w-full">
-                  <button type="submit" className="w-full text-left">
+                  <button type="submit" className="w-full text-start">
                     {t("Sign out")}
                   </button>
                 </form>

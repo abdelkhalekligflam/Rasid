@@ -28,7 +28,7 @@ export default function SettingsPage() {
     queryKey: ["profile-settings"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error("Session expirée.")
+      if (!user) throw new Error(t('Please sign in again.'))
       const { data, error } = await supabase.from("profiles")
         .select("id, full_name, currency, theme_preference").eq("id", user.id).single()
       if (error) throw error
@@ -42,9 +42,9 @@ export default function SettingsPage() {
   }, [profile?.theme_preference, setTheme])
   const saveName = useMutation({
     mutationFn: async () => {
-      if (!profile) throw new Error("Profil introuvable.")
+      if (!profile) throw new Error(t('Profile not found.'))
       const value = (name ?? profile.full_name ?? "").trim()
-      if (!value) throw new Error("Saisis ton nom.")
+      if (!value) throw new Error(t('Name is required.'))
       const { error } = await supabase.from("profiles").update({ full_name: value }).eq("id", profile.id)
       if (error) throw error
     },
@@ -56,7 +56,7 @@ export default function SettingsPage() {
   })
   const changeTheme = useMutation({
     mutationFn: async (value: "light" | "dark" | "system") => {
-      if (!profile) throw new Error("Profil introuvable.")
+      if (!profile) throw new Error(t('Profile not found.'))
       const { error } = await supabase.from("profiles").update({ theme_preference: value }).eq("id", profile.id)
       if (error) throw error
       return value
@@ -69,8 +69,8 @@ export default function SettingsPage() {
   })
   const changePassword = useMutation({
     mutationFn: async () => {
-      if (password.length < 8) throw new Error("Utilise au moins 8 caractères.")
-      if (password !== confirmPassword) throw new Error("Les mots de passe ne correspondent pas.")
+      if (password.length < 8) throw new Error(t('Use at least 8 characters.'))
+      if (password !== confirmPassword) throw new Error(t('Passwords do not match.'))
       const { error } = await supabase.auth.updateUser({ password })
       if (error) throw error
     },

@@ -28,7 +28,7 @@ export function GoalActions({ goal }: { goal: Goal }) {
   const update = useMutation({
     mutationFn: async () => {
       const value = Number(target)
-      if (!name.trim() || !Number.isFinite(value) || value <= 0) throw new Error("Nom et montant cible positif obligatoires.")
+      if (!name.trim() || !Number.isFinite(value) || value <= 0) throw new Error(t('Enter a name and a positive target amount.'))
       const { error } = await supabase.from("savings_goals")
         .update({ name: name.trim(), target_amount: value, target_date: date || null }).eq("id", goal.id)
       if (error) throw error
@@ -40,8 +40,8 @@ export function GoalActions({ goal }: { goal: Goal }) {
       const { error } = await supabase.from("savings_goals").delete().eq("id", goal.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmOpen(false); notify("Objectif supprimé.") },
-    onError: () => notify("Impossible de supprimer l’objectif.", true),
+    onSuccess: () => { refresh(); setConfirmOpen(false); notify(t('Goal deleted.')) },
+    onError: () => notify(t("Couldn't delete the goal."), true),
   })
   return (
     <>

@@ -108,7 +108,7 @@ export default function TransactionsPage() {
               <p
                 className={`font-heading font-semibold tabular-nums ${
                   tx.type === "income" ? "text-primary" : "text-foreground"
-                } ml-auto shrink-0`}
+                } ms-auto shrink-0`}
               >
                 {tx.type === "income" ? "+" : "-"}
                 {money(Number(tx.amount))}

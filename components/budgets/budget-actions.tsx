@@ -27,7 +27,7 @@ export function BudgetActions({ budget }: { budget: Budget }) {
   const update = useMutation({
     mutationFn: async () => {
       const value = Number(amount)
-      if (!Number.isFinite(value) || value <= 0) throw new Error("Le plafond doit être positif.")
+      if (!Number.isFinite(value) || value <= 0) throw new Error(t('Limit must be positive'))
       const { error } = await supabase.from("budgets")
         .update({ amount_limit: value, recurrence }).eq("id", budget.id)
       if (error) throw error
@@ -40,8 +40,8 @@ export function BudgetActions({ budget }: { budget: Budget }) {
         .update({ is_active: false }).eq("id", budget.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmOpen(false); notify("Budget archivé.") },
-    onError: () => notify("Impossible d’archiver le budget.", true),
+    onSuccess: () => { refresh(); setConfirmOpen(false); notify(t('Budget archived.')) },
+    onError: () => notify(t("Couldn't archive the budget."), true),
   })
   return (
     <>

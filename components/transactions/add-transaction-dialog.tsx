@@ -83,7 +83,7 @@ export function AddTransactionDialog() {
   const mutation = useMutation({
     mutationFn: async (values: TransactionInput) => {
       const { data: userData } = await supabase.auth.getUser()
-      if (!userData.user) throw new Error("Non connecté")
+      if (!userData.user) throw new Error(t('Please sign in again.'))
 
       const { error } = await supabase.from("transactions").insert({
         user_id: userData.user.id,
@@ -113,8 +113,8 @@ export function AddTransactionDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle transaction
+          <Plus className="me-2 h-4 w-4" />
+          {t('New transaction')}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -133,7 +133,7 @@ export function AddTransactionDialog() {
                 setValue("categoryId", "")
               }}
             >
-              Dépense
+              {t('Expense')}
             </Button>
             <Button
               type="button"
@@ -145,7 +145,7 @@ export function AddTransactionDialog() {
                 setValue("categoryId", "")
               }}
             >
-              Revenu
+              {t('Income item')}
             </Button>
           </div>
 
@@ -195,11 +195,11 @@ export function AddTransactionDialog() {
                   type="button"
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-start font-normal",
                     !selectedDate && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="me-2 h-4 w-4" />
                   {selectedDate ? format(selectedDate, "dd/MM/yyyy") : t("Choose a date")}
                 </Button>
               </PopoverTrigger>

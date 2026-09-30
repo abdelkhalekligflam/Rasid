@@ -53,14 +53,14 @@ export default function CategoriesPage() {
   }
   const save = useMutation({
     mutationFn: async () => {
-      if (!name.trim()) throw new Error("Le nom est obligatoire.")
+      if (!name.trim()) throw new Error(t('Name is required.'))
       if (editing) {
         const { error } = await supabase.from("categories")
           .update({ name: name.trim(), color }).eq("id", editing.id).eq("is_default", false)
         if (error) throw error
       } else {
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error("Session expirée.")
+        if (!user) throw new Error(t('Please sign in again.'))
         const { error } = await supabase.from("categories").insert({
           user_id: user.id, name: name.trim(), type, color, is_default: false,
         })
@@ -76,7 +76,7 @@ export default function CategoriesPage() {
       if (error) throw error
     },
     onSuccess: () => { refresh(); setConfirmCategory(null); notify(t("Category deleted.")) },
-    onError: () => { notify(t("Couldn't delete this category."), true); setActionError("Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des transactions ou budgets.") },
+    onError: () => { notify(t("Couldn't delete this category."), true); setActionError(t('This category is used by transactions or budgets and cannot be deleted.')) },
   })
   const startCreate = () => {
     setEditing(null); setName(""); setType("expense"); setColor("#10B981"); setActionError(""); setOpen(true)

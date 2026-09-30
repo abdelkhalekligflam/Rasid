@@ -71,7 +71,7 @@ export function AddBudgetDialog() {
   const mutation = useMutation({
     mutationFn: async (values: BudgetInput) => {
       const { data: userData } = await supabase.auth.getUser()
-      if (!userData.user) throw new Error("Non connecté")
+      if (!userData.user) throw new Error(t('Please sign in again.'))
 
       const { error } = await supabase.from("budgets").insert({
         user_id: userData.user.id,
@@ -97,8 +97,8 @@ export function AddBudgetDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouveau budget
+          <Plus className="me-2 h-4 w-4" />
+          {t('New budget')}
         </Button>
       </DialogTrigger>
       <DialogContent>
