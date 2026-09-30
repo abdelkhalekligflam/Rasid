@@ -20,6 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Rasid",
+  icons: { icon: "/rasid-icon.svg", shortcut: "/rasid-icon.svg" },
   description: "Track budgets, transactions and savings goals with clarity",
 };
 

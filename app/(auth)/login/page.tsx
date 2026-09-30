@@ -1,5 +1,6 @@
 "use client"
 
+import { BrandLogo } from "@/components/shared/brand-logo"
 import { LanguageSelect, useT, useLocale } from "@/components/locale-provider"
 
 import { translateLegacy } from "@/lib/i18n"
@@ -60,7 +61,7 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
       <div className="absolute end-5 top-5"><LanguageSelect /></div>
       <div className="relative w-full max-w-md">
-      <Link href="/" className="mb-7 block text-center font-heading text-2xl font-semibold tracking-[-0.05em] text-foreground">rasid<span className="text-foreground">.</span></Link>
+      <Link href="/" className="mb-7 block text-center font-heading text-2xl font-semibold tracking-[-0.05em] text-foreground"><BrandLogo /></Link>
       <Card className="w-full rounded-xl border-border shadow-none">
         <CardHeader>
           <CardTitle className="text-2xl font-heading">

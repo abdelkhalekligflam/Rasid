@@ -1,5 +1,6 @@
 "use client"
 
+import { BrandLogo } from "@/components/shared/brand-logo"
 import Link from "next/link"
 import { useT, useLocale } from "@/components/locale-provider"
 import { usePathname } from "next/navigation"
@@ -56,7 +57,7 @@ export function AppSidebar() {
     <Sidebar side={locale === "ar" ? "right" : "left"}>
       <SidebarHeader className="border-b px-5 py-5">
         <span className="text-lg font-heading font-semibold tracking-[-0.04em] text-foreground">
-          rasid<span className="text-emerald-500">.</span>
+          <BrandLogo />
         </span>
       </SidebarHeader>
       <SidebarContent className="px-2 py-5">
