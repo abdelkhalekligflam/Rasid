@@ -5,7 +5,7 @@ import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
 import { LanguageSelect, useT } from "@/components/locale-provider"
 
 import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { KeyRound, Mail, Palette, Tags, UserRound, Wallet, Languages, Camera, Download, ShieldCheck, Monitor, Sun, Moon, Eye, EyeOff, Check } from "lucide-react"
 import { notify } from "@/components/shared/toast"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -24,7 +24,7 @@ export default function SettingsPage() {
   const t = useT()
   const supabase = createClient()
   const queryClient = useQueryClient()
-  const { setTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
   const photoInput = useRef<HTMLInputElement>(null)
   const [photoError, setPhotoError] = useState("")
   const [photoBusy, setPhotoBusy] = useState(false)
@@ -45,11 +45,6 @@ export default function SettingsPage() {
       return { ...data, email: user.email || "", verified: !!user.email_confirmed_at }
     },
   })
-  useEffect(() => {
-    if (profile?.theme_preference && ["light", "dark", "system"].includes(profile.theme_preference)) {
-      setTheme(profile.theme_preference)
-    }
-  }, [profile?.theme_preference, setTheme])
   const saveName = useMutation({
     mutationFn: async () => {
       if (!profile) throw new Error(t('Profile not found.'))
@@ -191,7 +186,7 @@ export default function SettingsPage() {
         <Card id="appearance" className="scroll-mt-24 rounded-xl shadow-none"><CardContent className="space-y-5 p-6 sm:p-8">
           <div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-lg border bg-muted"><Palette className="size-4" /></div><div><h2 className="font-heading text-base font-semibold">{t("Appearance")}</h2><p className="text-xs text-muted-foreground">{t("Choose the theme that works for you.")}</p></div></div>
           <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label={t("Appearance")}>
-            {(["light", "dark", "system"] as const).map((option) => <Button key={option} type="button" variant={profile.theme_preference === option ? "default" : "outline"} aria-pressed={profile.theme_preference === option} disabled={changeTheme.isPending} onClick={() => changeTheme.mutate(option)} className="h-24 flex-col gap-3 rounded-xl">{option === "light" ? <Sun className="size-5" /> : option === "dark" ? <Moon className="size-5" /> : <Monitor className="size-5" />}{option === "light" ? t("Light") : option === "dark" ? t("Dark") : t("System")}</Button>)}
+            {(["light", "dark", "system"] as const).map((option) => <Button key={option} type="button" variant={theme === option ? "default" : "outline"} aria-pressed={theme === option} disabled={changeTheme.isPending} onClick={() => changeTheme.mutate(option)} className="h-24 flex-col gap-3 rounded-xl">{option === "light" ? <Sun className="size-5" /> : option === "dark" ? <Moon className="size-5" /> : <Monitor className="size-5" />}{option === "light" ? t("Light") : option === "dark" ? t("Dark") : t("System")}</Button>)}
           </div>
           {changeTheme.error && <p role="alert" className="text-sm text-destructive">{t("Couldn't change the theme.")}</p>}
         </CardContent></Card>

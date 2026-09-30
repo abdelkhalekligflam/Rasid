@@ -8,11 +8,12 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { signupSchema, type SignupInput } from "@/lib/validations/auth"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import {
   Card,
@@ -34,6 +35,7 @@ export default function SignupPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<SignupInput>({
@@ -138,17 +140,16 @@ export default function SignupPage() {
 
             <div className="space-y-2">
               <Label htmlFor="currency">{t("Currency")}</Label>
-              <select
-                id="currency"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                {...register("currency")}
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+              <Controller name="currency" control={control} render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="currency" ref={field.ref} onBlur={field.onBlur} className="w-full" aria-invalid={!!errors.currency}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCIES.map((currency) => <SelectItem key={currency} value={currency}>{currency}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )} />
               <p className="text-xs text-muted-foreground">
                 {t('This choice is permanent. All your data will use this currency.')}
               </p>
