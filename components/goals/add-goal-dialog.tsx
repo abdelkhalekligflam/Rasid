@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT, useLocale } from "@/components/locale-provider"
 
 import { translateLegacy } from "@/lib/i18n"
@@ -27,6 +29,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 
 export function AddGoalDialog() {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const locale = useLocale()
   const [open, setOpen] = useState(false)
@@ -61,7 +64,7 @@ export function AddGoalDialog() {
       })
       if (error) throw error
     },
-    onSuccess: () => {
+    onSuccess: () => { void refreshDashboard();
       queryClient.invalidateQueries({ queryKey: ["goals"] })
       reset()
       setOpen(false)

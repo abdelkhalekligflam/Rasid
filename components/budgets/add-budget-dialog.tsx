@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT, useLocale } from "@/components/locale-provider"
 import { categoryName } from "@/lib/i18n"
 
@@ -38,6 +40,7 @@ type Category = {
 }
 
 export function AddBudgetDialog() {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const locale = useLocale()
   const [open, setOpen] = useState(false)
@@ -82,7 +85,7 @@ export function AddBudgetDialog() {
       })
       if (error) throw error
     },
-    onSuccess: () => {
+    onSuccess: () => { void refreshDashboard();
       queryClient.invalidateQueries({ queryKey: ["budgets"] })
       reset()
       setOpen(false)

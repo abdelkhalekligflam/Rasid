@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { LanguageSelect, useT } from "@/components/locale-provider"
 
 import Link from "next/link"
@@ -16,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 export default function SettingsPage() {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const supabase = createClient()
   const queryClient = useQueryClient()
@@ -49,6 +52,7 @@ export default function SettingsPage() {
       if (error) throw error
     },
     onSuccess: () => {
+      void refreshDashboard()
       queryClient.invalidateQueries({ queryKey: ["profile-settings"] })
       setName(null)
       notify(t("Profile saved."))

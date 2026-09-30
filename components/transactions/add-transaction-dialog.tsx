@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT, useLocale } from "@/components/locale-provider"
 import { categoryName } from "@/lib/i18n"
 
@@ -45,6 +47,7 @@ type Category = {
 }
 
 export function AddTransactionDialog() {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const locale = useLocale()
   const [open, setOpen] = useState(false)
@@ -95,7 +98,7 @@ export function AddTransactionDialog() {
       })
       if (error) throw error
     },
-    onSuccess: () => {
+    onSuccess: () => { void refreshDashboard();
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
       queryClient.invalidateQueries({ queryKey: ["transactions-for-budgets"] })
       queryClient.invalidateQueries({ queryKey: ["unread-alert-count"] })

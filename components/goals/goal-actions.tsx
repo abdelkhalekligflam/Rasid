@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT } from "@/components/locale-provider"
 
 import { useState } from "react"
@@ -16,6 +18,7 @@ import { Label } from "@/components/ui/label"
 type Goal = { id: string; name: string; target_amount: number; target_date: string | null }
 
 export function GoalActions({ goal }: { goal: Goal }) {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const supabase = createClient()
   const queryClient = useQueryClient()
@@ -33,14 +36,14 @@ export function GoalActions({ goal }: { goal: Goal }) {
         .update({ name: name.trim(), target_amount: value, target_date: date || null }).eq("id", goal.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setOpen(false) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setOpen(false) },
   })
   const remove = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("savings_goals").delete().eq("id", goal.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmOpen(false); notify(t('Goal deleted.')) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setConfirmOpen(false); notify(t('Goal deleted.')) },
     onError: () => notify(t("Couldn't delete the goal."), true),
   })
   return (

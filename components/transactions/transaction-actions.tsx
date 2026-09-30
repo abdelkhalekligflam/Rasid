@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT, useLocale } from "@/components/locale-provider"
 import { categoryName } from "@/lib/i18n"
 
@@ -25,6 +27,7 @@ export type TransactionRow = {
 }
 
 export function TransactionActions({ transaction }: { transaction: TransactionRow }) {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const locale = useLocale()
   const supabase = createClient()
@@ -63,14 +66,14 @@ export function TransactionActions({ transaction }: { transaction: TransactionRo
       }).eq("id", transaction.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setOpen(false) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setOpen(false) },
   })
   const remove = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("transactions").delete().eq("id", transaction.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmOpen(false); notify(t('Deleted transaction.')) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setConfirmOpen(false); notify(t('Deleted transaction.')) },
     onError: () => notify(t("Couldn't delete the transaction."), true),
   })
 

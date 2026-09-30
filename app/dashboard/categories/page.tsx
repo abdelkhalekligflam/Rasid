@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT, useLocale } from "@/components/locale-provider"
 import { categoryName } from "@/lib/i18n"
 
@@ -25,6 +27,7 @@ type Category = {
 }
 
 export default function CategoriesPage() {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const locale = useLocale()
   const supabase = createClient()
@@ -67,7 +70,7 @@ export default function CategoriesPage() {
         if (error) throw error
       }
     },
-    onSuccess: () => { refresh(); setOpen(false) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setOpen(false) },
   })
   const remove = useMutation({
     mutationFn: async (category: Category) => {
@@ -75,7 +78,7 @@ export default function CategoriesPage() {
         .eq("id", category.id).eq("is_default", false)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmCategory(null); notify(t("Category deleted.")) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setConfirmCategory(null); notify(t("Category deleted.")) },
     onError: () => { notify(t("Couldn't delete this category."), true); setActionError(t('This category is used by transactions or budgets and cannot be deleted.')) },
   })
   const startCreate = () => {

@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT } from "@/components/locale-provider"
 
 import { useState } from "react"
@@ -16,6 +18,7 @@ import { Label } from "@/components/ui/label"
 type Budget = { id: string; amount_limit: number; recurrence: "weekly" | "monthly" | "yearly"; categories: { name: string } | null }
 
 export function BudgetActions({ budget }: { budget: Budget }) {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const supabase = createClient()
   const queryClient = useQueryClient()
@@ -32,7 +35,7 @@ export function BudgetActions({ budget }: { budget: Budget }) {
         .update({ amount_limit: value, recurrence }).eq("id", budget.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setOpen(false) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setOpen(false) },
   })
   const archive = useMutation({
     mutationFn: async () => {
@@ -40,7 +43,7 @@ export function BudgetActions({ budget }: { budget: Budget }) {
         .update({ is_active: false }).eq("id", budget.id)
       if (error) throw error
     },
-    onSuccess: () => { refresh(); setConfirmOpen(false); notify(t('Budget archived.')) },
+    onSuccess: () => { void refreshDashboard(); refresh(); setConfirmOpen(false); notify(t('Budget archived.')) },
     onError: () => notify(t("Couldn't archive the budget."), true),
   })
   return (

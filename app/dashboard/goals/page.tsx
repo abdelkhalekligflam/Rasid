@@ -1,5 +1,7 @@
 "use client"
 
+import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
+
 import { useT, useLocale } from "@/components/locale-provider"
 
 import { useState } from "react"
@@ -32,6 +34,7 @@ type Goal = {
 }
 
 function ContributeDialog({ goal }: { goal: Goal }) {
+  const refreshDashboard = useRefreshDashboard()
   const t = useT()
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState("")
@@ -48,7 +51,7 @@ function ContributeDialog({ goal }: { goal: Goal }) {
       })
       if (error) throw error
     },
-    onSuccess: () => {
+    onSuccess: () => { void refreshDashboard();
       queryClient.invalidateQueries({ queryKey: ["goals"] })
       queryClient.invalidateQueries({ queryKey: ["unread-alert-count"] })
       queryClient.invalidateQueries({ queryKey: ["alerts"] })
