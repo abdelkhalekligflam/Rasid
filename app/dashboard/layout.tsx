@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { LanguageSelect } from "@/components/locale-provider"
 import { getT } from "@/lib/i18n-server"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
@@ -30,7 +30,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, avatar_image")
     .eq("id", user.id)
     .single()
 
@@ -59,8 +59,9 @@ export default async function DashboardLayout({
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="outline-none">
+              <button aria-label={t("Account")} className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_image ?? undefined} alt={t("Profile photo")} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                     {initials}
                   </AvatarFallback>
