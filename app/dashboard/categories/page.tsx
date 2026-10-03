@@ -46,6 +46,8 @@ export default function CategoriesPage() {
   const { data: categories, isLoading, error } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
+      const { error: defaultsError } = await supabase.rpc("ensure_account_defaults")
+      if (defaultsError) throw defaultsError
       const { data, error } = await supabase.from("categories")
         .select("id, name, type, color, is_default").order("name")
       if (error) throw error
@@ -105,6 +107,7 @@ export default function CategoriesPage() {
       <Card><CardContent className="p-0">
         {isLoading && <div className="p-4"><PageSkeleton /></div>}
         {error && <p role="alert" className="p-6 text-sm text-destructive">{t("Couldn't load categories.")}</p>}
+        {!isLoading && !error && !categories?.length && <p className="p-6 text-sm text-muted-foreground">{t("No categories yet.")}</p>}
         {categories?.map((category) => (
           <div key={category.id} className="flex items-center gap-3 border-b px-5 py-4 last:border-0">
             <span className="size-3 rounded-full" style={{ backgroundColor: category.color || "#94A3B8" }} />

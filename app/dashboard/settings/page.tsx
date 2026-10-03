@@ -45,6 +45,8 @@ export default function SettingsPage() {
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error(t('Please sign in again.'))
+      const { error: defaultsError } = await supabase.rpc("ensure_account_defaults")
+      if (defaultsError) throw defaultsError
       const { data, error } = await supabase.from("profiles")
         .select("id, full_name, currency, theme_preference, avatar_image, created_at").eq("id", user.id).single()
       if (error) throw error
