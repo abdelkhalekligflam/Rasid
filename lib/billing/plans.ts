@@ -13,3 +13,23 @@ export function csvCell(value: unknown) {
   if (/^[\s]*[=+\-@\t\r]/.test(text)) text = "'" + text
   return '"' + text.replaceAll('"', '""') + '"'
 }
+
+export const BILLING_CURRENCIES = ["MAD", "USD", "EUR", "GBP"] as const
+export type BillingCurrency = typeof BILLING_CURRENCIES[number]
+export type BillingInterval = "monthly" | "yearly"
+// Independent fixed commercial prices in minor units; no exchange-rate conversion.
+export const BILLING_PRICES: Record<BillingCurrency, Record<BillingInterval, number>> = {
+  MAD: { monthly: 4900, yearly: 58800 },
+  USD: { monthly: 499, yearly: 5988 },
+  EUR: { monthly: 499, yearly: 5988 },
+  GBP: { monthly: 399, yearly: 4788 },
+}
+export function billingChoice(currency: unknown, interval: unknown): { currency: BillingCurrency; interval: BillingInterval } {
+  return { currency: BILLING_CURRENCIES.includes(currency as BillingCurrency) ? currency as BillingCurrency : "MAD", interval: interval === "yearly" ? "yearly" : "monthly" }
+}
+export function billingAmount(currency: BillingCurrency, interval: BillingInterval) {
+  return BILLING_PRICES[currency][interval] / 100
+}
+export function checkoutUrl(currency: BillingCurrency, interval: BillingInterval) {
+  return `/dashboard/checkout?currency=${currency}&interval=${interval}`
+}
