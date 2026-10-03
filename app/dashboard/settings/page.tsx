@@ -6,7 +6,7 @@ import { LanguageSelect, useT } from "@/components/locale-provider"
 
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { KeyRound, Mail, Palette, Tags, UserRound, Wallet, Languages, Camera, Download, ShieldCheck, Monitor, Sun, Moon, Eye, EyeOff, Check } from "lucide-react"
+import { KeyRound, Mail, Palette, Tags, UserRound, Wallet, Languages, Camera, Download, ShieldCheck, Monitor, Sun, Moon, Eye, EyeOff, Check, TriangleAlert, Trash2 } from "lucide-react"
 import { notify } from "@/components/shared/toast"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTheme } from "next-themes"
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { ConfirmAction } from "@/components/shared/confirm-action"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PageSkeleton } from "@/components/shared/page-skeleton"
 
 export default function SettingsPage() {
@@ -30,6 +31,9 @@ export default function SettingsPage() {
   const [photoBusy, setPhotoBusy] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [confirmSessions, setConfirmSessions] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState("")
+  const [deletePassword, setDeletePassword] = useState("")
   const [name, setName] = useState<string | null>(null)
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -152,6 +156,18 @@ export default function SettingsPage() {
     onSuccess: () => { setConfirmSessions(false); notify(t("Other sessions signed out.")) },
   })
 
+  const deleteAccount = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/account", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmation: deleteConfirmation, password: deletePassword }) })
+      const result = await response.json()
+      if (!response.ok || !result.ok) throw new Error(t(result.code === "invalid_password" ? "Your current password is incorrect." : "Couldn't delete your account. Please sign in and try again."))
+    },
+    onSuccess: () => {
+      queryClient.clear()
+      window.location.replace("/login")
+    },
+  })
+
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <div>
@@ -163,7 +179,7 @@ export default function SettingsPage() {
       {error && <p role="alert" className="text-sm text-destructive">{t("Couldn't load your profile.")}</p>}
       {profile && <div className="space-y-6">
         <nav aria-label={t("Settings")} className="flex flex-wrap gap-2 border-b pb-5">
-          {[["profile", "Profile"], ["appearance", "Appearance"], ["language", "Language"], ["security", "Security"], ["data", "Your data"]].map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-muted">{t(label)}</a>)}
+          {[["profile", "Profile"], ["appearance", "Appearance"], ["language", "Language"], ["security", "Security"], ["data", "Your data"], ["danger", "Danger zone"]].map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-muted">{t(label)}</a>)}
         </nav>
         <Card id="profile" className="scroll-mt-24 rounded-xl shadow-none"><CardContent className="space-y-6 p-6 sm:p-8">
           <div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-lg border bg-muted"><UserRound className="size-4" /></div><div><h2 className="font-heading text-base font-semibold">{t("Profile")}</h2><p className="text-xs text-muted-foreground">{t("Your personal information")}</p></div></div>
@@ -210,6 +226,20 @@ export default function SettingsPage() {
           <Button asChild variant="outline"><Link href="/dashboard/categories">{t("Manage categories")}</Link></Button>
         </CardContent></Card>
         <Card id="data" className="scroll-mt-24 rounded-xl shadow-none"><CardContent className="space-y-5 p-6 sm:p-8"><div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-lg border bg-muted"><Download className="size-4" /></div><div><h2 className="font-heading text-base font-semibold">{t("Your data")}</h2><p className="text-xs text-muted-foreground">{t("Download a copy of your financial records.")}</p></div></div><div className="flex flex-col gap-4 rounded-xl border bg-muted/30 p-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm font-medium">{t("Export account data")}</p><p className="mt-1 text-xs text-muted-foreground">{t("Transactions, budgets, goals, categories and alerts in JSON format.")}</p></div><Button variant="outline" disabled={exportData.isPending} onClick={() => exportData.mutate()}><Download className="size-4" />{exportData.isPending ? t("Exporting...") : t("Download export")}</Button></div>{exportData.error && <p role="alert" className="text-sm text-destructive">{t("Couldn't export your data. Please try again.")}</p>}<p className="flex items-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="size-4" />{t("Your records are private to your account.")}</p></CardContent></Card>
+        <Card id="danger" className="scroll-mt-24 rounded-xl border-destructive/40 shadow-none"><CardContent className="space-y-5 p-6 sm:p-8">
+          <div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10 text-destructive"><TriangleAlert className="size-4" /></div><div><h2 className="font-heading text-base font-semibold text-destructive">{t("Danger zone")}</h2><p className="text-xs text-muted-foreground">{t("Permanent actions for your account.")}</p></div></div>
+          <div className="flex flex-col justify-between gap-4 border-t border-destructive/20 pt-5 sm:flex-row sm:items-center"><div><h3 className="text-sm font-medium">{t("Delete account")}</h3><p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-foreground">{t("Permanently delete your account, profile photo and all financial records. This cannot be undone. Export your data first if you want a copy.")}</p></div><Button variant="destructive" onClick={() => { deleteAccount.reset(); setDeleteConfirmation(""); setDeletePassword(""); setDeleteOpen(true) }}><Trash2 className="size-4" />{t("Delete account")}</Button></div>
+        </CardContent></Card>
+        <Dialog open={deleteOpen} onOpenChange={(open) => { if (!deleteAccount.isPending) { setDeleteOpen(open); if (!open) { setDeletePassword(""); setDeleteConfirmation("") } } }}>
+          <DialogContent className="max-w-md rounded-xl"><DialogHeader><DialogTitle className="text-destructive">{t("Delete your account permanently?")}</DialogTitle><DialogDescription>{t("All your transactions, budgets, goals, categories and alerts will be deleted. You will be signed out on all devices.")}</DialogDescription></DialogHeader>
+            <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (deleteConfirmation === "DELETE" && deletePassword) deleteAccount.mutate() }}>
+              <div className="space-y-2"><Label htmlFor="delete-password">{t("Current password")}</Label><Input id="delete-password" type="password" autoComplete="current-password" required maxLength={1024} disabled={deleteAccount.isPending} value={deletePassword} onChange={(event) => setDeletePassword(event.target.value)} /></div>
+              <div className="space-y-2"><Label htmlFor="delete-confirmation">{t("Type DELETE to confirm")}</Label><Input id="delete-confirmation" dir="ltr" autoComplete="off" spellCheck={false} disabled={deleteAccount.isPending} value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} /></div>
+              {deleteAccount.error && <p role="alert" className="text-sm text-destructive">{deleteAccount.error.message}</p>}
+              <DialogFooter className="gap-2"><Button type="button" variant="outline" disabled={deleteAccount.isPending} onClick={() => { setDeleteOpen(false); setDeletePassword(""); setDeleteConfirmation("") }}>{t("Cancel")}</Button><Button type="submit" variant="destructive" disabled={deleteAccount.isPending || deleteConfirmation !== "DELETE" || !deletePassword}>{t(deleteAccount.isPending ? "Deleting account..." : "Delete account")}</Button></DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
         <ConfirmAction open={confirmSessions} onOpenChange={setConfirmSessions} title={t("Sign out other devices?")} description={t("You will stay signed in on this device.")} action={t("Sign out other devices")} pending={closeOtherSessions.isPending} onConfirm={() => closeOtherSessions.mutate()} />
       </div>}
     </div>
