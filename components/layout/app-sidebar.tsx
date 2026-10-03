@@ -15,6 +15,7 @@ import {
   Tags,
   Settings,
   Crown,
+  LifeBuoy,
 } from "lucide-react"
 import {
   Sidebar,
@@ -35,6 +36,7 @@ const navItems = [
   { title: "Alerts", url: "/dashboard/alerts", icon: Bell },
   { title: "Categories", url: "/dashboard/categories", icon: Tags },
   { title: "Plans & billing", url: "/dashboard/billing", icon: Crown },
+  { title: "Support", url: "/dashboard/support", icon: LifeBuoy },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ]
 
