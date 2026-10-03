@@ -343,3 +343,6 @@ Object.assign(translations.ar, {
   "USD — US dollar": "USD — الدولار الأمريكي",
   "GBP — British pound": "GBP — الجنيه الإسترليني"
 })
+
+Object.assign(translations.fr, { "Theme": "Thème" })
+Object.assign(translations.ar, { "Theme": "المظهر" })

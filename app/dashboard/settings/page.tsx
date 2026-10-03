@@ -226,8 +226,15 @@ export default function SettingsPage() {
         </CardContent></Card>
         <Card id="appearance" className="scroll-mt-24 rounded-xl shadow-none"><CardContent className="space-y-5 p-6 sm:p-8">
           <div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-lg border bg-muted"><Palette className="size-4" /></div><div><h2 className="font-heading text-base font-semibold">{t("Appearance")}</h2><p className="text-xs text-muted-foreground">{t("Choose the theme that works for you.")}</p></div></div>
-          <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label={t("Appearance")}>
-            {(["light", "dark", "system"] as const).map((option) => <Button key={option} type="button" variant={theme === option ? "default" : "outline"} aria-pressed={theme === option} disabled={changeTheme.isPending} onClick={() => changeTheme.mutate(option)} className="h-24 flex-col gap-3 rounded-xl">{option === "light" ? <Sun className="size-5" /> : option === "dark" ? <Moon className="size-5" /> : <Monitor className="size-5" />}{option === "light" ? t("Light") : option === "dark" ? t("Dark") : t("System")}</Button>)}
+          <div className="flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
+            <span className="text-sm font-medium">{t("Theme")}</span>
+            <div className="inline-flex shrink-0 items-center gap-0.5 rounded-full border bg-muted/30 p-0.5" role="group" aria-label={t("Theme")}>
+              {(["system", "light", "dark"] as const).map((option) => {
+                const label = option === "light" ? t("Light") : option === "dark" ? t("Dark") : t("System")
+                const Icon = option === "light" ? Sun : option === "dark" ? Moon : Monitor
+                return <button key={option} type="button" aria-label={label} title={label} aria-pressed={theme === option} disabled={changeTheme.isPending} onClick={() => changeTheme.mutate(option)} className={`flex size-8 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-50 ${theme === option ? "border-border bg-background text-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="size-4" aria-hidden="true" /></button>
+              })}
+            </div>
           </div>
           {changeTheme.error && <p role="alert" className="text-sm text-destructive">{t("Couldn't change the theme.")}</p>}
         </CardContent></Card>
