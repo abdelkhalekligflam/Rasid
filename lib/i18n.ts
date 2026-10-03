@@ -313,3 +313,33 @@ Object.assign(translations.fr, {
 Object.assign(translations.ar, {
   "Please sign in again.": "يرجى تسجيل الدخول مجدداً.", "Name is required.": "الاسم مطلوب.", "Profile not found.": "لم يتم العثور على الملف الشخصي.", "Use at least 8 characters.": "استخدم 8 أحرف على الأقل.", "Passwords do not match.": "كلمتا المرور غير متطابقتين.", "Enter a name and a positive target amount.": "أدخل اسماً ومبلغاً مستهدفاً موجباً.", "This category is used by transactions or budgets and cannot be deleted.": "هذه الفئة مرتبطة بمعاملات أو ميزانيات ولا يمكن حذفها."
 })
+
+Object.assign(translations.fr, {
+  "Save currency": "Enregistrer la devise",
+  "Account currency updated.": "Devise du compte mise à jour.",
+  "Change account currency?": "Changer la devise du compte ?",
+  "Couldn't update your currency. Please try again.": "Impossible de modifier la devise. Réessaie.",
+  "Changing currency updates all amount labels. Existing amounts are not converted.": "Changer de devise modifie l’affichage de tous les montants. Les montants existants ne sont pas convertis.",
+  "All transactions, budgets and goals will use the new currency label. Their numeric amounts will stay the same, with no exchange-rate conversion.": "Toutes les transactions, tous les budgets et objectifs afficheront la nouvelle devise. Les valeurs restent identiques, sans conversion de taux de change.",
+  "You can change your currency later in Settings. Amounts are never automatically converted.": "Tu peux modifier ta devise dans les paramètres. Les montants ne sont jamais convertis automatiquement.",
+  "Free to get started · Your currency, your choice": "Commence gratuitement · Ta devise, ton choix",
+  "MAD — Moroccan dirham": "MAD — Dirham marocain",
+  "EUR — Euro": "EUR — Euro",
+  "USD — US dollar": "USD — Dollar américain",
+  "GBP — British pound": "GBP — Livre sterling"
+})
+
+Object.assign(translations.ar, {
+  "Save currency": "حفظ العملة",
+  "Account currency updated.": "تم تحديث عملة الحساب.",
+  "Change account currency?": "تغيير عملة الحساب؟",
+  "Couldn't update your currency. Please try again.": "تعذر تحديث العملة. حاول مجدداً.",
+  "Changing currency updates all amount labels. Existing amounts are not converted.": "تغيير العملة يغيّر تسمية جميع المبالغ. لا يتم تحويل المبالغ الحالية.",
+  "All transactions, budgets and goals will use the new currency label. Their numeric amounts will stay the same, with no exchange-rate conversion.": "ستعرض جميع المعاملات والميزانيات والأهداف العملة الجديدة. تبقى القيم الرقمية كما هي دون تحويل أسعار الصرف.",
+  "You can change your currency later in Settings. Amounts are never automatically converted.": "يمكنك تغيير العملة لاحقاً في الإعدادات. لا يتم تحويل المبالغ تلقائياً.",
+  "Free to get started · Your currency, your choice": "ابدأ مجاناً · عملتك، اختيارك",
+  "MAD — Moroccan dirham": "MAD — الدرهم المغربي",
+  "EUR — Euro": "EUR — اليورو",
+  "USD — US dollar": "USD — الدولار الأمريكي",
+  "GBP — British pound": "GBP — الجنيه الإسترليني"
+})

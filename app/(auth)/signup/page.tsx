@@ -151,7 +151,7 @@ export default function SignupPage() {
                 </Select>
               )} />
               <p className="text-xs text-muted-foreground">
-                {t('This choice is permanent. All your data will use this currency.')}
+                {t('You can change your currency later in Settings. Amounts are never automatically converted.')}
               </p>
             </div>
 

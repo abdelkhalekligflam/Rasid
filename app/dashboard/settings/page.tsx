@@ -16,6 +16,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { ConfirmAction } from "@/components/shared/confirm-action"
@@ -36,6 +37,8 @@ export default function SettingsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
   const [deletePassword, setDeletePassword] = useState("")
+  const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null)
+  const [confirmCurrency, setConfirmCurrency] = useState(false)
   const [name, setName] = useState<string | null>(null)
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -66,6 +69,23 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ["profile-settings"] })
       setName(null)
       notify(t("Profile saved."))
+    },
+  })
+  const changeCurrency = useMutation({
+    mutationFn: async () => {
+      if (!profile) throw new Error(t("Profile not found."))
+      if (!selectedCurrency || !["MAD", "EUR", "USD", "GBP"].includes(selectedCurrency)) throw new Error(t("Select a currency"))
+      const { data, error } = await supabase.from("profiles").update({ currency: selectedCurrency }).eq("id", profile.id).select("currency").single()
+      if (error) throw error
+      return data.currency as string
+    },
+    onSuccess: (currency) => {
+      queryClient.setQueryData(["profile-currency"], currency)
+      void queryClient.invalidateQueries({ queryKey: ["profile-settings"] })
+      void refreshDashboard()
+      setSelectedCurrency(null)
+      setConfirmCurrency(false)
+      notify(t("Account currency updated."))
     },
   })
   const changeTheme = useMutation({
@@ -201,7 +221,7 @@ export default function SettingsPage() {
           {saveName.error && <p role="alert" className="text-sm text-destructive">{saveName.error.message}</p>}
           <div className="grid gap-5 border-t pt-5 sm:grid-cols-2">
             <div className="flex items-start gap-3"><Mail className="mt-0.5 size-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">{t("Email address")}</p><p className="mt-1 break-all text-sm font-medium">{profile.email}</p>{profile.verified && <span className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"><Check className="size-3" />{t("Verified email")}</span>}</div></div>
-            <div className="flex items-start gap-3"><Wallet className="mt-0.5 size-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">{t("Account currency")}</p><p className="mt-1 text-sm font-medium">{profile.currency}</p><p className="mt-1 text-xs text-muted-foreground">{t("Fixed at sign-up, with no automatic conversion.")}</p></div></div>
+            <div className="flex items-start gap-3"><Wallet className="mt-0.5 size-4 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">{t("Account currency")}</p><div className="mt-2 space-y-3"><Select value={selectedCurrency ?? profile.currency} onValueChange={(value) => { setSelectedCurrency(value); changeCurrency.reset() }} disabled={changeCurrency.isPending}><SelectTrigger aria-label={t("Account currency")} className="w-full min-w-48"><SelectValue /></SelectTrigger><SelectContent>{[["MAD", "MAD — Moroccan dirham"], ["EUR", "EUR — Euro"], ["USD", "USD — US dollar"], ["GBP", "GBP — British pound"]].map(([value, label]) => <SelectItem key={value} value={value}>{t(label)}</SelectItem>)}</SelectContent></Select><p className="text-xs leading-relaxed text-muted-foreground">{t("Changing currency updates all amount labels. Existing amounts are not converted.")}</p><Button size="sm" variant="outline" disabled={changeCurrency.isPending || !selectedCurrency || selectedCurrency === profile.currency} onClick={() => setConfirmCurrency(true)}>{t("Save currency")}</Button>{changeCurrency.error && <p role="alert" className="text-sm text-destructive">{t("Couldn't update your currency. Please try again.")}</p>}</div></div></div>
           </div>
         </CardContent></Card>
         <Card id="appearance" className="scroll-mt-24 rounded-xl shadow-none"><CardContent className="space-y-5 p-6 sm:p-8">
@@ -235,6 +255,7 @@ export default function SettingsPage() {
           <div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-lg border border-destructive/30 bg-destructive/10 text-destructive"><TriangleAlert className="size-4" /></div><div><h2 className="font-heading text-base font-semibold text-destructive">{t("Danger zone")}</h2><p className="text-xs text-muted-foreground">{t("Permanent actions for your account.")}</p></div></div>
           <div className="flex flex-col justify-between gap-4 border-t border-destructive/20 pt-5 sm:flex-row sm:items-center"><div><h3 className="text-sm font-medium">{t("Delete account")}</h3><p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-foreground">{t("Permanently delete your account, profile photo and all financial records. This cannot be undone. Export your data first if you want a copy.")}</p></div><Button variant="destructive" onClick={() => { deleteAccount.reset(); setDeleteConfirmation(""); setDeletePassword(""); setDeleteOpen(true) }}><Trash2 className="size-4" />{t("Delete account")}</Button></div>
         </CardContent></Card>
+        <ConfirmAction open={confirmCurrency} onOpenChange={(open) => { if (!changeCurrency.isPending) setConfirmCurrency(open) }} title={t("Change account currency?")} description={`${profile.currency} → ${selectedCurrency ?? profile.currency}. ${t("All transactions, budgets and goals will use the new currency label. Their numeric amounts will stay the same, with no exchange-rate conversion.")}`} action={t("Save currency")} pending={changeCurrency.isPending} onConfirm={() => changeCurrency.mutate()} />
         <Dialog open={deleteOpen} onOpenChange={(open) => { if (!deleteAccount.isPending) { setDeleteOpen(open); if (!open) { setDeletePassword(""); setDeleteConfirmation("") } } }}>
           <DialogContent className="max-w-md rounded-xl"><DialogHeader><DialogTitle className="text-destructive">{t("Delete your account permanently?")}</DialogTitle><DialogDescription>{t("All your transactions, budgets, goals, categories and alerts will be deleted. You will be signed out on all devices.")}</DialogDescription></DialogHeader>
             <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); if (deleteConfirmation === "DELETE" && deletePassword) deleteAccount.mutate() }}>
