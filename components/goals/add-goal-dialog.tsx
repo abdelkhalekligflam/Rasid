@@ -33,6 +33,7 @@ export function AddGoalDialog() {
   const t = useT()
   const locale = useLocale()
   const [open, setOpen] = useState(false)
+  const [dateOpen, setDateOpen] = useState(false)
   const supabase = createClient()
   const queryClient = useQueryClient()
 
@@ -118,7 +119,7 @@ export function AddGoalDialog() {
 
           <div className="space-y-2">
             <Label>{t('Target date (optional)')}</Label>
-            <Popover>
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -138,7 +139,8 @@ export function AddGoalDialog() {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(date) => date && setValue("targetDate", date)}
+                  defaultMonth={selectedDate}
+                  onSelect={(date) => { if (date) { setValue("targetDate", date, { shouldValidate: true, shouldDirty: true }); setDateOpen(false) } }}
                 />
               </PopoverContent>
             </Popover>

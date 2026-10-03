@@ -51,6 +51,7 @@ export function AddTransactionDialog() {
   const t = useT()
   const locale = useLocale()
   const [open, setOpen] = useState(false)
+  const [dateOpen, setDateOpen] = useState(false)
   const [type, setType] = useState<"income" | "expense">("expense")
   const supabase = createClient()
   const queryClient = useQueryClient()
@@ -192,7 +193,7 @@ export function AddTransactionDialog() {
 
           <div className="space-y-2">
             <Label>{t('Date')}</Label>
-            <Popover>
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -210,7 +211,8 @@ export function AddTransactionDialog() {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(date) => date && setValue("transactionDate", date)}
+                  defaultMonth={selectedDate}
+                  onSelect={(date) => { if (date) { setValue("transactionDate", date, { shouldValidate: true, shouldDirty: true }); setDateOpen(false) } }}
                 />
               </PopoverContent>
             </Popover>

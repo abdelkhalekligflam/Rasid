@@ -9,7 +9,10 @@ import {
   getDefaultClassNames,
   type DayButton,
   type Locale,
+  type DropdownProps,
 } from "react-day-picker"
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
@@ -18,7 +21,9 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  captionLayout = "label",
+  captionLayout = "dropdown",
+  startMonth = new Date(1900, 0),
+  endMonth = new Date(new Date().getFullYear() + 30, 11),
   buttonVariant = "ghost",
   locale,
   formatters,
@@ -35,12 +40,14 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "group/calendar bg-background p-3 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(8)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        "group/calendar bg-background p-3 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(10)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
       )}
       captionLayout={captionLayout}
+      startMonth={startMonth}
+      endMonth={endMonth}
       locale={calendarLocale}
       dir={appLocale === "ar" ? "rtl" : "ltr"}
       formatters={{
@@ -139,6 +146,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
+        Dropdown: CalendarDropdown,
         Root: ({ className, rootRef, ...props }) => {
           return (
             <div
@@ -183,6 +191,16 @@ function Calendar({
       {...props}
     />
   )
+}
+
+function CalendarDropdown({ options = [], value, onChange, disabled, "aria-label": label, name }: DropdownProps) {
+  const locale = useLocale()
+  return <Select name={name} value={String(value)} disabled={disabled} dir={locale === "ar" ? "rtl" : "ltr"} onValueChange={(value) => onChange?.({ target: { value } } as React.ChangeEvent<HTMLSelectElement>)}>
+    <SelectTrigger size="sm" aria-label={label} className="h-9 gap-1 rounded-md px-2 text-sm shadow-none"><SelectValue /></SelectTrigger>
+    <SelectContent position="popper" className="max-h-64 min-w-24">
+      {options.map((option) => <SelectItem key={option.value} value={String(option.value)} disabled={option.disabled}>{option.label}</SelectItem>)}
+    </SelectContent>
+  </Select>
 }
 
 function CalendarDayButton({
