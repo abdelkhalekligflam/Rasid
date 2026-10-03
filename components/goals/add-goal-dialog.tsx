@@ -1,5 +1,8 @@
 "use client"
 
+import Link from "next/link"
+import { freeLimitMessage } from "@/lib/billing/plans"
+
 import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
 
 import { useT, useLocale } from "@/components/locale-provider"
@@ -149,7 +152,7 @@ export function AddGoalDialog() {
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? t("Creating...") : t("Create goal")}
           </Button>
-          {mutation.error && <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p>}
+          {mutation.error && <div role="alert" className="space-y-2"><p className="text-sm text-destructive">{freeLimitMessage(mutation.error, t)}</p>{mutation.error.message.startsWith("FREE_LIMIT_") && <Link href="/dashboard/billing" className="text-sm underline underline-offset-4">{t("View plans")}</Link>}</div>}
         </form>
       </DialogContent>
     </Dialog>

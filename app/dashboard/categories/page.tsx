@@ -1,5 +1,8 @@
 "use client"
 
+import Link from "next/link"
+import { freeLimitMessage } from "@/lib/billing/plans"
+
 import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
 
 import { useT, useLocale } from "@/components/locale-provider"
@@ -149,7 +152,7 @@ export default function CategoriesPage() {
               <Label htmlFor="category-color">{t("Color")}</Label>
               <Input id="category-color" type="color" value={color} onChange={(event) => setColor(event.target.value)} />
             </div>
-            {save.error && <p role="alert" className="text-sm text-destructive">{save.error.message}</p>}
+            {save.error && <div role="alert"><p className="text-sm text-destructive">{freeLimitMessage(save.error, t)}</p>{save.error.message.startsWith("FREE_LIMIT_") && <Link href="/dashboard/billing" className="text-sm underline">{t("View plans")}</Link>}</div>}
             <Button type="submit" className="w-full" disabled={save.isPending}>
               {save.isPending ? t("Saving...") : t("Save")}
             </Button>

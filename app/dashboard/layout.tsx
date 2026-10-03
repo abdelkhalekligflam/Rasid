@@ -1,3 +1,5 @@
+import Link from "next/link"
+import { hasPro, type Subscription } from "@/lib/billing/plans"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { AppSidebar } from "@/components/layout/app-sidebar"
@@ -34,6 +36,9 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single()
 
+  const { data: subscription } = await supabase.from("account_subscriptions").select("plan,status,provider,payment_reference,current_period_end").eq("user_id", user.id).maybeSingle()
+  const pro = hasPro(subscription as Subscription | null)
+
   const initials = (profile?.full_name || user.email || "?")
     .split(" ")
     .map((n: string) => n[0])
@@ -55,6 +60,7 @@ export default async function DashboardLayout({
         <header className="flex items-center justify-between h-16 px-5 sm:px-8 border-b bg-background sticky top-0 z-10">
           <SidebarTrigger />
           <div className="flex items-center gap-2">
+          <Link href="/dashboard/billing" aria-label={t("Your plan")} className="rounded-full border px-2.5 py-1 text-xs font-semibold">{pro ? "Pro" : "Free"}</Link>
           <LanguageSelect />
           <ThemeToggle />
           <DropdownMenu>

@@ -9,6 +9,7 @@ export function useRefreshDashboard() {
   const router = useRouter()
   const queryClient = useQueryClient()
   return useCallback(async () => {
+    void queryClient.invalidateQueries({ queryKey: ["account-plan"] })
     void queryClient.invalidateQueries({ queryKey: ["alerts"] })
     void queryClient.invalidateQueries({ queryKey: ["unread-alert-count"] })
     try {

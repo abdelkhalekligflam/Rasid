@@ -14,6 +14,7 @@ import {
   Bell,
   Tags,
   Settings,
+  Crown,
 } from "lucide-react"
 import {
   Sidebar,
@@ -33,6 +34,7 @@ const navItems = [
   { title: "Goals", url: "/dashboard/goals", icon: Target },
   { title: "Alerts", url: "/dashboard/alerts", icon: Bell },
   { title: "Categories", url: "/dashboard/categories", icon: Tags },
+  { title: "Plans & billing", url: "/dashboard/billing", icon: Crown },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ]
 

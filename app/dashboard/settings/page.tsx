@@ -1,5 +1,7 @@
 "use client"
 
+import { PlanPanel } from "@/components/billing/plan-panel"
+
 import { useRefreshDashboard } from "@/hooks/use-refresh-dashboard"
 
 import { LanguageSelect, useT } from "@/components/locale-provider"
@@ -179,8 +181,9 @@ export default function SettingsPage() {
       {error && <p role="alert" className="text-sm text-destructive">{t("Couldn't load your profile.")}</p>}
       {profile && <div className="space-y-6">
         <nav aria-label={t("Settings")} className="flex flex-wrap gap-2 border-b pb-5">
-          {[["profile", "Profile"], ["appearance", "Appearance"], ["language", "Language"], ["security", "Security"], ["data", "Your data"], ["danger", "Danger zone"]].map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-muted">{t(label)}</a>)}
+          {[["plan", "Your plan"], ["profile", "Profile"], ["appearance", "Appearance"], ["language", "Language"], ["security", "Security"], ["data", "Your data"], ["danger", "Danger zone"]].map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-muted">{t(label)}</a>)}
         </nav>
+        <PlanPanel />
         <Card id="profile" className="scroll-mt-24 rounded-xl shadow-none"><CardContent className="space-y-6 p-6 sm:p-8">
           <div className="flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-lg border bg-muted"><UserRound className="size-4" /></div><div><h2 className="font-heading text-base font-semibold">{t("Profile")}</h2><p className="text-xs text-muted-foreground">{t("Your personal information")}</p></div></div>
           <div className="flex flex-col gap-5 rounded-xl border bg-muted/30 p-5 sm:flex-row sm:items-center">
