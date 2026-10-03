@@ -1,10 +1,14 @@
+import { redirect } from "next/navigation"
 import { BrandLogo } from "@/components/shared/brand-logo"
 import Link from "next/link"
 import { ArrowRight, ArrowUpRight, ChartNoAxesCombined, CircleCheck, Target, Wallet } from "lucide-react"
 import { LanguageSelect } from "@/components/locale-provider"
 import { getT } from "@/lib/i18n-server"
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ code?: string; error?: string }> }) {
+  const params = await searchParams
+  if (params.code) redirect(`/auth/callback?code=${encodeURIComponent(params.code)}`)
+  if (params.error) redirect("/reset-password?error=invalid")
   const t = await getT()
   return <div className="min-h-screen bg-background text-foreground">
     <header className="border-b border-border/80"><div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
